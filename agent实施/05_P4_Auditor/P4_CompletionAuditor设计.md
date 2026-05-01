@@ -1,7 +1,7 @@
 # P4 CompletionAuditor 设计
 
 > 所属阶段：P4  
-> 状态：待实施  
+> 状态：最小实现已落地  
 > 目标：任务完成状态由系统规则判定，不由模型文本决定。
 
 ---
@@ -12,12 +12,13 @@
 
 ## 2. 目标
 
-- [ ] 独立 `CompletionAuditor` 模块。
-- [ ] 规则判定 completed/incomplete/blocked/failed/canceled。
-- [ ] 支持 required step。
-- [ ] 支持 required artifact。
-- [ ] 支持 partial 成功。
-- [ ] Reporter 只负责解释，不负责判定。
+- [x] 独立 `CompletionAuditor` 模块。
+- [x] 规则判定 completed/incomplete/blocked/failed/canceled。
+- [x] 支持 required step。
+- [x] 支持 partial 成功（skipped 计入完成）。
+- [x] `audit_task()` 委托给 `CompletionAuditor`。
+- [ ] 支持 required artifact 校验。
+- [ ] Reporter 独立模块。
 
 ## 3. 非目标
 
@@ -72,17 +73,18 @@ canceled
 
 ## 8. TODO
 
-- [ ] 新建 `auditor.py`。
+- [x] 新建 `completion_auditor.py`。
+- [x] 从 P0 `audit_task()` 迁移规则并增强。
+- [x] 增加 5 级优先判定（canceled > failed > blocked > incomplete > completed）。
+- [x] `next_action` 提示（replanner / ask_user）。
 - [ ] 新建 `reporter.py`。
-- [ ] 从 P0 `audit_task()` 迁移规则。
-- [ ] 增加 required step 判定。
 - [ ] 增加 artifact verified 判定。
-- [ ] 增加 final_report 构造。
 - [ ] 前端优先展示后端 final_report。
 
 ## 9. 验收标准
 
-- [ ] required step 未完成时不会 completed。
-- [ ] failed step 不可恢复时任务 failed。
-- [ ] blocked step 需要用户输入时任务 blocked。
-- [ ] 所有 required step 和 artifact 完成时任务 completed。
+- [x] required step 未完成时不会 completed。
+- [x] failed step 时任务 failed + next_action=replanner。
+- [x] blocked step 时任务 blocked + next_action=ask_user。
+- [x] 所有 required step 完成时任务 completed。
+- [ ] artifact verified 校验。

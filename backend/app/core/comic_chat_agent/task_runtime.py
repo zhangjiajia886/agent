@@ -152,36 +152,8 @@ def apply_tool_result(task: RuntimeTask, step: RuntimeStep, result: ToolResult) 
 
 
 def audit_task(task: RuntimeTask, last_text: str = "") -> dict[str, Any]:
-    required = task.steps
-    completed = [s for s in required if s.status == "succeeded"]
-    failed = [s for s in required if s.status == "failed"]
-    blocked = [s for s in required if s.status == "blocked"]
-    remaining = [s for s in required if s.status in {"pending", "ready", "running", "awaiting_approval"}]
-    incomplete_text = bool(re.search(r"剩余\s*TODO|尚未完成|未完成|还需要|需要继续|下一步", last_text or ""))
-
-    if failed:
-        status = "failed"
-        reason = "存在失败步骤。"
-    elif blocked:
-        status = "blocked"
-        reason = "存在阻塞步骤。"
-    elif remaining or incomplete_text:
-        status = "incomplete"
-        reason = "仍有步骤未完成。"
-    else:
-        status = "completed"
-        reason = "所有规划步骤已完成。"
-
-    return {
-        "status": status,
-        "complete": status == "completed",
-        "reason": reason,
-        "completed_steps": [step_event_payload(s) for s in completed],
-        "failed_steps": [step_event_payload(s) for s in failed],
-        "blocked_steps": [step_event_payload(s) for s in blocked],
-        "remaining_steps": [step_event_payload(s) for s in remaining],
-        "artifacts": task.artifacts,
-    }
+    from .completion_auditor import CompletionAuditor
+    return CompletionAuditor().audit_to_dict(task, last_text)
 
 
 def final_report_event(task: RuntimeTask, audit: dict[str, Any], metadata: dict[str, Any]) -> dict[str, Any]:
