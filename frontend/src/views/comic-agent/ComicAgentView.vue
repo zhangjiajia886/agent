@@ -60,178 +60,13 @@
         @approve-step="approveTaskStep"
       />
 
-      <!-- 消息列表 -->
-      <div
-        v-for="msg in timelineMessages"
-        :key="msg.id"
-        class="message-row"
-        :class="msg.type"
-      >
-        <!-- 用户消息 -->
-        <template v-if="msg.type === 'user'">
-          <div class="msg-bubble user-bubble">
-            <div class="msg-content">{{ msg.content }}</div>
-            <div class="msg-time">{{ formatTime(msg.timestamp) }}</div>
-          </div>
-          <div class="msg-avatar user-avatar">👤</div>
-        </template>
-
-        <!-- Agent 文字回复 + 内联图片/视频 -->
-        <template v-else-if="msg.type === 'assistant'">
-          <div class="msg-avatar bot-avatar">🤖</div>
-          <div class="msg-bubble bot-bubble">
-            <div v-if="msg.content" class="msg-content" v-html="renderMarkdown(msg.content || '')"></div>
-            <!-- 内联图片网格 -->
-            <div v-if="msg.images?.length" class="inline-images">
-              <el-image
-                v-for="(url, i) in msg.images"
-                :key="i"
-                :src="url"
-                fit="cover"
-                class="inline-img"
-                :preview-src-list="allImageUrls"
-                :initial-index="allImageUrls.indexOf(url)"
-                lazy
-              >
-                <template #placeholder>
-                  <div class="img-loading"><el-icon class="is-loading"><Loading /></el-icon></div>
-                </template>
-              </el-image>
-            </div>
-            <!-- 内联视频 -->
-            <div v-if="msg.videos?.length" class="inline-videos">
-              <video v-for="(url, i) in msg.videos" :key="i" :src="url" controls class="inline-video" />
-            </div>
-            <div class="msg-time">{{ formatTime(msg.timestamp) }}</div>
-          </div>
-        </template>
-
-        <!-- 思考过程（始终可折叠显示） -->
-        <template v-else-if="msg.type === 'thinking'">
-          <div class="msg-avatar bot-avatar" style="opacity:0.5">🤔</div>
-          <div :class="['thinking-bubble', { 'thinking-done': msg.isFinished }]">
-            <!-- 可折叠头部 -->
-            <div class="thinking-collapse-header" @click="msg.expanded = !msg.expanded">
-              <template v-if="!msg.isFinished">
-                <span class="thinking-dot"></span>
-                <span class="thinking-dot"></span>
-                <span class="thinking-dot"></span>
-                <span style="margin-left:6px;font-size:11px;color:#909399">思考中...</span>
-              </template>
-              <template v-else>
-                <span style="color:#67C23A;font-size:12px">已完成分析</span>
-                <span style="margin-left:6px;font-size:11px;color:#909399">共 {{ (msg.content||'').split('\n').length }} 行</span>
-              </template>
-              <span style="margin-left:auto;font-size:11px;color:#c0c4cc">{{ msg.expanded ? '▲ 收起详情' : '▼ 查看详情' }}</span>
-            </div>
-            <div v-show="msg.expanded" class="thinking-content">{{ msg.content }}</div>
-          </div>
-        </template>
-
-        <!-- 工具开始执行 -->
-        <template v-else-if="msg.type === 'tool_start'">
-          <div class="msg-avatar bot-avatar">🤖</div>
-          <div class="tool-card tool-card--running">
-            <div class="tool-card-header">
-              <el-icon class="is-loading"><Loading /></el-icon>
-              <span class="tool-name">{{ toolDisplayName(msg.tool) }}</span>
-              <el-tag size="small" type="warning">处理中</el-tag>
-              <span class="tool-elapsed">{{ toolElapsed(msg.timestamp) }}</span>
-            </div>
-            <div class="tool-action-desc" v-if="msg.description">{{ msg.description }}</div>
-            <div class="tool-hint" v-if="!msg.description && toolHint(msg.tool)">{{ toolHint(msg.tool) }}</div>
-            <div class="tool-params" v-if="msg.toolInput">
-              <div v-for="(val, key) in compactParams(msg.toolInput)" :key="key" class="tool-param-row">
-                <span class="tool-param-key">{{ key }}:</span>
-                <span class="tool-param-val">{{ val }}</span>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- 工具确认请求 -->
-        <template v-else-if="msg.type === 'tool_confirm'">
-          <div class="msg-avatar bot-avatar">🤖</div>
-          <div class="tool-card tool-card--confirm">
-            <div class="tool-card-header">
-              <el-icon color="#E6A23C"><Warning /></el-icon>
-              <span class="tool-name">{{ toolDisplayName(msg.tool) }}</span>
-              <el-tag size="small" type="warning">待你确认</el-tag>
-            </div>
-            <div class="tool-action-desc" v-if="msg.description">{{ msg.description }}</div>
-            <div class="tool-params" v-if="msg.toolInput">
-              <div v-for="(val, key) in compactParams(msg.toolInput)" :key="key" class="tool-param-row">
-                <span class="tool-param-key">{{ key }}:</span>
-                <span class="tool-param-val">{{ val }}</span>
-              </div>
-            </div>
-            <div class="tool-confirm-actions" v-if="!msg.confirmed">
-              <el-button type="primary" size="small" @click="handleToolApproval(msg, 'approve')">
-                确认执行
-              </el-button>
-              <el-button type="danger" size="small" plain @click="handleToolApproval(msg, 'reject')">
-                取消本次操作
-              </el-button>
-            </div>
-            <div v-else class="tool-confirm-result">
-              <el-tag :type="msg.confirmed === 'approve' ? 'success' : 'danger'" size="small">
-                {{ msg.confirmed === 'approve' ? '已确认执行' : '已取消' }}
-              </el-tag>
-            </div>
-          </div>
-        </template>
-
-        <!-- 工具执行完成 -->
-        <template v-else-if="msg.type === 'tool_done'">
-          <div class="msg-avatar bot-avatar">🤖</div>
-          <div class="tool-card tool-card--done">
-            <div class="tool-card-header">
-              <el-icon color="#67C23A"><CircleCheck /></el-icon>
-              <span class="tool-name">{{ toolDisplayName(msg.tool) }}</span>
-              <el-tag size="small" type="success">已完成</el-tag>
-              <span v-if="msg.duration" class="tool-duration">{{ msg.duration.toFixed(1) }}s</span>
-            </div>
-            <!-- 图片预览 -->
-            <div v-if="msg.imageUrl" class="tool-image-wrap">
-              <el-image
-                :src="msg.imageUrl"
-                fit="cover"
-                class="tool-image"
-                :preview-src-list="allImageUrls"
-                :initial-index="allImageUrls.indexOf(msg.imageUrl)"
-                lazy
-              >
-                <template #placeholder>
-                  <div class="img-loading"><el-icon class="is-loading"><Loading /></el-icon></div>
-                </template>
-              </el-image>
-            </div>
-            <!-- 视频预览 -->
-            <div v-if="msg.videoUrl" class="tool-video-wrap">
-              <video :src="msg.videoUrl" controls class="tool-video"></video>
-            </div>
-            <!-- 文字结果 -->
-            <div v-if="msg.toolResult && !msg.imageUrl && !msg.videoUrl" class="tool-result-text">
-              {{ msg.toolResult }}
-            </div>
-          </div>
-        </template>
-
-        <!-- 错误 -->
-        <template v-else-if="msg.type === 'error'">
-          <div class="msg-avatar bot-avatar">🤖</div>
-          <el-alert :title="msg.content || '未知错误'" type="error" show-icon :closable="false" class="error-alert" />
-        </template>
-      </div>
-
-      <!-- 流式打字中 -->
-      <div v-if="streamingText" class="message-row assistant">
-        <div class="msg-avatar bot-avatar">🤖</div>
-        <div class="msg-bubble bot-bubble">
-          <div class="msg-content" v-html="renderMarkdown(streamingText)"></div>
-          <span class="cursor-blink">▋</span>
-        </div>
-      </div>
+      <ChatMessageList
+        :timeline-messages="timelineMessages"
+        :streaming-text="streamingText"
+        :all-image-urls="allImageUrls"
+        :tool-elapsed="toolElapsed"
+        @tool-approval="handleToolApproval"
+      />
     </div>
 
     <!-- 生成的图片汇总（底部浮动条） -->
@@ -255,133 +90,37 @@
       </div>
     </div>
 
-    <!-- 输入区域 -->
-    <div class="input-area">
-      <div class="input-toolbar">
-        <el-select v-model="selectedModel" size="small" placeholder="执行模型" style="width:170px">
-          <el-option
-            v-for="m in enabledAgentModels"
-            :key="m.model_id"
-            :label="m.name"
-            :value="m.model_id"
-          >
-            <span>{{ m.name }}</span>
-            <el-tag v-if="m.is_default" size="small" type="success" style="margin-left:4px;transform:scale(0.85)">默认</el-tag>
-          </el-option>
-        </el-select>
-        <el-select v-model="selectedStyle" size="small" placeholder="创作风格" style="width:100px">
-          <el-option label="自动识别" value="auto" />
-          <el-option label="⚔️ 仙侠" value="xianxia" />
-          <el-option label="🖌️ 水墨" value="ink" />
-          <el-option label="🎁 盲盒" value="blindbox" />
-          <el-option label="🌸 动漫" value="anime" />
-          <el-option label="📷 写实" value="realistic" />
-        </el-select>
-        <el-select v-model="selectedFrames" size="small" placeholder="分镜数" style="width:90px">
-          <el-option :label="'2 格'" :value="2" />
-          <el-option :label="'4 格'" :value="4" />
-          <el-option :label="'6 格'" :value="6" />
-        </el-select>
-        <div class="toolbar-divider"></div>
-        <el-tooltip content="开启后 Agent 回复将自动语音播报">
-          <div class="toolbar-switch">
-            <el-switch v-model="ttsEnabled" size="small" />
-            <span class="toolbar-switch-label">🔊 语音播报</span>
-          </div>
-        </el-tooltip>
-        <el-tooltip content="开启后每格图片自动生成动态视频">
-          <div class="toolbar-switch">
-            <el-switch v-model="autoVideo" size="small" />
-            <span class="toolbar-switch-label">🎬 动态化</span>
-          </div>
-        </el-tooltip>
-        <el-tooltip content="新消息的思考过程自动展开">
-          <div class="toolbar-switch">
-            <el-switch v-model="showThinking" size="small" />
-            <span class="toolbar-switch-label">🤔 展开分析</span>
-          </div>
-        </el-tooltip>
-        <el-tooltip content="开启后创作类工具（生图/视频/TTS）无需逐个审批">
-          <div class="toolbar-switch">
-            <el-switch v-model="autoExec" size="small" active-color="#67C23A" />
-            <span class="toolbar-switch-label">⚡ 自动审批</span>
-          </div>
-        </el-tooltip>
-      </div>
-      <!-- 图片附件预览 -->
-      <div v-if="attachedImages.length" class="attached-images">
-        <div v-for="(img, idx) in attachedImages" :key="idx" class="attached-image-item">
-          <img :src="img.previewUrl" class="attached-thumb" />
-          <div v-if="img.uploading" class="attached-loading">
-            <el-icon class="is-loading"><Loading /></el-icon>
-          </div>
-          <button class="attached-remove" @click="removeAttachedImage(idx)">×</button>
-        </div>
-      </div>
-      <div class="input-row">
-        <input
-          ref="fileInputRef"
-          type="file"
-          accept="image/*"
-          multiple
-          style="display: none"
-          @change="handleImageSelect"
-        />
-        <el-tooltip content="上传参考图片（最多4张）">
-          <el-button
-            :icon="PictureFilled"
-            circle
-            size="small"
-            @click="triggerImageUpload"
-            :disabled="sending || attachedImages.length >= MAX_IMAGES"
-            class="upload-btn"
-          />
-        </el-tooltip>
-        <el-input
-          v-model="inputText"
-          type="textarea"
-          :rows="2"
-          :placeholder="sending ? '系统正在处理中...' : '请输入你的创作需求，按 Enter 发送...'"
-          resize="none"
-          @keydown.enter.exact.prevent="handleSend"
-          :disabled="sending"
-          class="input-textarea"
-        />
-        <div class="input-actions">
-          <el-button
-            type="primary"
-            :icon="sending ? Loading : Promotion"
-            :loading="sending"
-            :disabled="!inputText.trim() || sending"
-            circle
-            size="large"
-            @click="handleSend"
-          />
-        </div>
-      </div>
-      <div class="input-hint">
-        Enter 发送 · Shift+Enter 换行 · 模型：{{ selectedModel }} · 风格：{{ selectedStyle === 'auto' ? '自动识别' : selectedStyle }} · 分镜：{{ selectedFrames }} 格
-      </div>
-    </div>
+    <ChatInputBar
+      v-model:model="selectedModel"
+      v-model:style="selectedStyle"
+      v-model:frames="selectedFrames"
+      v-model:tts="ttsEnabled"
+      v-model:video="autoVideo"
+      v-model:thinking="showThinking"
+      v-model:exec="autoExec"
+      v-model:text="inputText"
+      :sending="sending"
+      :attached-images="attachedImages"
+      :max-images="MAX_IMAGES"
+      :enabled-agent-models="enabledAgentModels"
+      @send="handleSend"
+      @image-select="handleImageSelect"
+      @remove-image="removeAttachedImage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Delete, Loading, Promotion, CircleCheck, Download, Setting, Warning, PictureFilled } from '@element-plus/icons-vue'
+import { Delete, Download, Setting } from '@element-plus/icons-vue'
 import { uploadAgentImage } from '@/api/comic-agent'
 import type { AttachedImage } from './types'
-import {
-  useTask,
-  useElapsed,
-  useConfig,
-  useChat,
-  toolDisplayName, toolHint,
-} from './composables'
-import { renderMarkdown, formatTime, compactParams } from './utils'
+import { useTask, useElapsed, useConfig, useChat } from './composables'
 import SettingsDrawer from './components/SettingsDrawer.vue'
 import TaskWorkspace from './components/TaskWorkspace.vue'
+import ChatMessageList from './components/ChatMessageList.vue'
+import ChatInputBar from './components/ChatInputBar.vue'
 
 // ──────────── 任务管理 (composable) ────────────
 const task = useTask()
@@ -406,7 +145,6 @@ const autoExec = ref(false)
 
 // ──────────── 图片附件状态 ────────────
 const attachedImages = ref<AttachedImage[]>([])
-const fileInputRef = ref<HTMLInputElement>()
 const MAX_IMAGES = 4
 const messagesRef = ref<HTMLElement>()
 
@@ -438,10 +176,6 @@ function handleSend() { _handleSend(sendParams) }
 function sendQuickPrompt(text: string) { _sendQuickPrompt(text, sendParams) }
 
 // ──────────── 图片附件操作 ────────────
-function triggerImageUpload() {
-  fileInputRef.value?.click()
-}
-
 async function handleImageSelect(e: Event) {
   const input = e.target as HTMLInputElement
   const files = input.files
