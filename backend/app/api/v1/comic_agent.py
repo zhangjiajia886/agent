@@ -25,6 +25,7 @@ from app.models.user import User
 from app.models.agent_config import ModelConfig, ModelCategory, ToolRegistry, WorkflowTemplate, WorkflowCategory
 from app.models.agent_chat import AgentConversation, AgentMessage, MessageRole, ConversationStatus
 from app.models.agent_prompt import AgentPrompt
+from app.models.agent_task import AgentArtifact, AgentEvent, AgentStep, AgentTask, ToolInvocation
 from app.schemas.agent import (
     ModelConfigSchema, ModelConfigUpdate,
     ToolRegistrySchema, ToolRegistryUpdate,
@@ -574,6 +575,116 @@ async def update_prompt(
 
 # ═══════════════════ 会话 CRUD ═══════════════════
 
+def _dt(value):
+    return value.isoformat() if value else None
+
+
+def _task_payload(task: AgentTask) -> dict:
+    return {
+        "id": task.id,
+        "task_uid": task.task_uid,
+        "conversation_id": task.conversation_id,
+        "user_id": task.user_id,
+        "user_goal": task.user_goal,
+        "task_type": task.task_type,
+        "status": task.status.value if hasattr(task.status, "value") else task.status,
+        "current_step_uid": task.current_step_uid,
+        "model_id": task.model_id,
+        "auto_mode": task.auto_mode,
+        "final_report": task.final_report,
+        "error": task.error,
+        "metadata": task.metadata_json,
+        "created_at": _dt(task.created_at),
+        "updated_at": _dt(task.updated_at),
+        "finished_at": _dt(task.finished_at),
+    }
+
+
+def _step_payload(step: AgentStep) -> dict:
+    return {
+        "id": step.id,
+        "step_uid": step.step_uid,
+        "task_uid": step.task_uid,
+        "parent_step_uid": step.parent_step_uid,
+        "title": step.title,
+        "description": step.description,
+        "step_type": step.step_type,
+        "tool_name": step.tool_name,
+        "status": step.status.value if hasattr(step.status, "value") else step.status,
+        "depends_on": step.depends_on,
+        "inputs": step.inputs,
+        "outputs": step.outputs,
+        "error": step.error,
+        "retry_count": step.retry_count,
+        "max_retries": step.max_retries,
+        "sort_order": step.sort_order,
+        "created_at": _dt(step.created_at),
+        "updated_at": _dt(step.updated_at),
+        "started_at": _dt(step.started_at),
+        "finished_at": _dt(step.finished_at),
+    }
+
+
+def _artifact_payload(artifact: AgentArtifact) -> dict:
+    return {
+        "id": artifact.id,
+        "artifact_uid": artifact.artifact_uid,
+        "task_uid": artifact.task_uid,
+        "step_uid": artifact.step_uid,
+        "artifact_type": artifact.artifact_type,
+        "title": artifact.title,
+        "url": artifact.url,
+        "file_path": artifact.file_path,
+        "mime_type": artifact.mime_type,
+        "size_bytes": artifact.size_bytes,
+        "verified": artifact.verified,
+        "metadata": artifact.metadata_json,
+        "created_at": _dt(artifact.created_at),
+    }
+
+
+def _event_payload(event: AgentEvent) -> dict:
+    return {
+        "id": event.id,
+        "event_uid": event.event_uid,
+        "task_uid": event.task_uid,
+        "step_uid": event.step_uid,
+        "event_type": event.event_type,
+        "payload": event.payload,
+        "created_at": _dt(event.created_at),
+    }
+
+
+def _tool_invocation_payload(invocation: ToolInvocation) -> dict:
+    return {
+        "id": invocation.id,
+        "invocation_uid": invocation.invocation_uid,
+        "task_uid": invocation.task_uid,
+        "step_uid": invocation.step_uid,
+        "tool_call_id": invocation.tool_call_id,
+        "tool_name": invocation.tool_name,
+        "input": invocation.input,
+        "output": invocation.output,
+        "status": invocation.status,
+        "error": invocation.error,
+        "started_at": _dt(invocation.started_at),
+        "finished_at": _dt(invocation.finished_at),
+        "created_at": _dt(invocation.created_at),
+    }
+
+
+async def _get_owned_task(task_uid: str, db: AsyncSession, current_user: User) -> AgentTask:
+    result = await db.execute(
+        select(AgentTask).where(
+            AgentTask.task_uid == task_uid,
+            AgentTask.user_id == current_user.id,
+        )
+    )
+    task = result.scalar_one_or_none()
+    if not task:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    return task
+
 @router.get("/conversations", response_model=List[ConversationListItem])
 async def list_conversations(
     skip: int = 0,
@@ -652,6 +763,101 @@ async def delete_conversation(
     conv.status = ConversationStatus.deleted
     await db.commit()
     return {"message": "会话已删除"}
+
+
+# ═══════════════════ Agent 任务查询 ═══════════════════
+
+@router.get("/tasks/{task_uid}")
+async def get_agent_task(
+    task_uid: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = await _get_owned_task(task_uid, db, current_user)
+    steps_result = await db.execute(
+        select(AgentStep)
+        .where(AgentStep.task_uid == task_uid)
+        .order_by(AgentStep.sort_order, AgentStep.id)
+    )
+    artifacts_result = await db.execute(
+        select(AgentArtifact)
+        .where(AgentArtifact.task_uid == task_uid)
+        .order_by(AgentArtifact.id)
+    )
+    invocations_result = await db.execute(
+        select(ToolInvocation)
+        .where(ToolInvocation.task_uid == task_uid)
+        .order_by(ToolInvocation.id)
+    )
+    return {
+        "task": _task_payload(task),
+        "steps": [_step_payload(row) for row in steps_result.scalars().all()],
+        "artifacts": [_artifact_payload(row) for row in artifacts_result.scalars().all()],
+        "tool_invocations": [_tool_invocation_payload(row) for row in invocations_result.scalars().all()],
+    }
+
+
+@router.get("/tasks/{task_uid}/events")
+async def list_agent_task_events(
+    task_uid: str,
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await _get_owned_task(task_uid, db, current_user)
+    result = await db.execute(
+        select(AgentEvent)
+        .where(AgentEvent.task_uid == task_uid)
+        .order_by(AgentEvent.id)
+        .offset(skip)
+        .limit(limit)
+    )
+    return [_event_payload(row) for row in result.scalars().all()]
+
+
+@router.get("/tasks/{task_uid}/artifacts")
+async def list_agent_task_artifacts(
+    task_uid: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await _get_owned_task(task_uid, db, current_user)
+    result = await db.execute(
+        select(AgentArtifact)
+        .where(AgentArtifact.task_uid == task_uid)
+        .order_by(AgentArtifact.id)
+    )
+    return [_artifact_payload(row) for row in result.scalars().all()]
+
+
+@router.get("/conversations/{conversation_id}/tasks")
+async def list_conversation_agent_tasks(
+    conversation_id: int,
+    skip: int = 0,
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    conv_result = await db.execute(
+        select(AgentConversation).where(
+            AgentConversation.id == conversation_id,
+            AgentConversation.user_id == current_user.id,
+        )
+    )
+    if not conv_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="会话不存在")
+    result = await db.execute(
+        select(AgentTask)
+        .where(
+            AgentTask.conversation_id == conversation_id,
+            AgentTask.user_id == current_user.id,
+        )
+        .order_by(AgentTask.id.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    return [_task_payload(row) for row in result.scalars().all()]
 
 
 # ═══════════════════ 图片上传 ═══════════════════
