@@ -7,6 +7,7 @@
 import asyncio
 import uuid
 import json
+from datetime import datetime as _datetime
 from typing import List, Optional
 
 import httpx
@@ -829,6 +830,56 @@ async def list_agent_task_artifacts(
         .order_by(AgentArtifact.id)
     )
     return [_artifact_payload(row) for row in result.scalars().all()]
+
+
+@router.post("/tasks/{task_uid}/cancel")
+async def cancel_agent_task(
+    task_uid: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """取消正在执行的任务"""
+    task = await _get_owned_task(task_uid, db, current_user)
+    if task.status in ("completed", "failed", "canceled"):
+        raise HTTPException(400, f"任务已处于终态: {task.status}")
+    task.status = "canceled"
+    task.finished_at = _datetime.utcnow()
+    # 将所有 pending/running step 置为 canceled
+    steps_result = await db.execute(
+        select(AgentStep).where(
+            AgentStep.task_uid == task_uid,
+            AgentStep.status.in_(["pending", "running", "ready", "awaiting_approval"]),
+        )
+    )
+    for step in steps_result.scalars().all():
+        step.status = "canceled"
+    await db.commit()
+    return {"task_uid": task_uid, "status": "canceled"}
+
+
+@router.get("/tasks/{task_uid}/trace")
+async def get_task_trace(
+    task_uid: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """获取任务的工具调用详情时间线"""
+    await _get_owned_task(task_uid, db, current_user)
+    invocations_result = await db.execute(
+        select(ToolInvocation)
+        .where(ToolInvocation.task_uid == task_uid)
+        .order_by(ToolInvocation.id)
+    )
+    events_result = await db.execute(
+        select(AgentEvent)
+        .where(AgentEvent.task_uid == task_uid)
+        .order_by(AgentEvent.id)
+    )
+    return {
+        "task_uid": task_uid,
+        "tool_invocations": [_tool_invocation_payload(row) for row in invocations_result.scalars().all()],
+        "events": [_event_payload(row) for row in events_result.scalars().all()],
+    }
 
 
 @router.get("/conversations/{conversation_id}/tasks")

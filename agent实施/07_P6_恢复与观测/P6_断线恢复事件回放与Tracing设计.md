@@ -1,7 +1,7 @@
 # P6 断线恢复、事件回放与 Tracing 设计
 
 > 所属阶段：P6/P7  
-> 状态：待实施  
+> 状态：最小实现已落地  
 > 目标：让长任务可恢复、可回放、可复盘。
 
 ---
@@ -12,11 +12,12 @@
 
 ## 2. 目标
 
-- [ ] 事件回放 API。
-- [ ] 断线恢复。
-- [ ] 任务取消/重试/恢复。
-- [ ] Trace 时间线。
-- [ ] 工具调用详情。
+- [x] 事件回放 API（`GET /tasks/{task_uid}/events` 已有）。
+- [x] 任务取消 API（`POST /tasks/{task_uid}/cancel`）。
+- [x] Trace 时间线（`EventTracer` + `GET /tasks/{task_uid}/trace`）。
+- [x] 工具调用详情（`trace_tool_call` / `trace_llm_call`）。
+- [ ] 断线恢复（前端回放逻辑）。
+- [ ] 任务重试/恢复 API。
 - [ ] 成功率/失败率统计。
 
 ## 3. 非目标
@@ -70,19 +71,18 @@ POST /api/v1/comic-agent/tasks/{task_uid}/resume
 
 ## 8. TODO
 
-- [ ] 实现事件查询 API。
+- [x] 新建 `event_tracer.py`（TraceRecord + EventTracer）。
+- [x] 实现 cancel API。
+- [x] 实现 trace API（`GET /tasks/{task_uid}/trace`）。
 - [ ] 前端支持事件回放。
-- [ ] 实现 cancel API。
-- [ ] 实现 retry API。
-- [ ] 实现 resume API。
+- [ ] 实现 retry / resume API。
 - [ ] 前端新增事件时间线。
-- [ ] 前端新增工具调用详情。
 - [ ] 后端统计成功率/失败率。
 
 ## 9. 验收标准
 
-- [ ] 页面刷新后能恢复任务状态。
-- [ ] 断线后能重新查看步骤和产物。
-- [ ] 用户能取消任务。
-- [ ] 失败步骤能重试。
-- [ ] 任务可按时间线复盘。
+- [x] 用户能取消任务（cancel API）。
+- [x] 任务可按时间线复盘（trace API）。
+- [x] EventTracer 记录 LLM/工具/步骤/审计/重规划事件。
+- [ ] 页面刷新后能恢复任务状态（前端）。
+- [ ] 失败步骤能重试（retry API）。
