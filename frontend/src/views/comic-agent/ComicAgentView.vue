@@ -695,28 +695,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Delete, Loading, Promotion, CircleCheck, Download, Setting, Warning, PictureFilled } from '@element-plus/icons-vue'
 import {
   ComicAgentWS,
-  fetchModels, updateModel,
-  fetchTools, updateTool,
-  fetchWorkflows, updateWorkflow,
-  fetchPrompts, updatePrompt,
   uploadAgentImage,
   type AgentMessage, type AgentEvent,
-  type ModelConfigItem, type ToolRegistryItem, type WorkflowTemplateItem,
-  type AgentPromptItem,
 } from '@/api/comic-agent'
 import type { TaskStep, AttachedImage } from './types'
 import {
   useTask,
+  useElapsed,
+  useConfig,
   toolDisplayName, toolHint,
   taskStatusLabel, taskStatusType,
   stepStatusLabel, stepStatusType,
   mapServerTaskStatus,
 } from './composables'
+import { renderMarkdown, formatTime, compactParams } from './utils'
 
 // ──────────── 状态 ────────────
 const messages = ref<AgentMessage[]>([])
@@ -740,12 +737,25 @@ const {
   upsertServerArtifact,
 } = useTask()
 
+// ──────────── 配置管理 (composable) ────────────
+const {
+  toolList, modelList, workflowList, promptList,
+  selectedModel, enabledAgentModels,
+  handleToolToggle, handleModelToggle,
+  handleSaveModelParams, handleSaveModelConnection,
+  handleWorkflowToggle, handlePromptToggle, handlePromptSave,
+  executorTagType, categoryTagType, categoryLabel,
+  wfCategoryTagType, wfCategoryLabel,
+} = useConfig()
+
+// ──────────── 耗时计时器 (composable) ────────────
+const { startElapsedTimer, stopElapsedTimer, toolElapsed } = useElapsed()
+
 // ──────────── 抽屉状态 ────────────
 const drawerVisible = ref(false)
 const drawerTab = ref('tools')
 
 // ──────────── 输入工具栏状态 ────────────
-const selectedModel = ref('claude-sonnet-4-6')
 const selectedStyle = ref('auto')
 const selectedFrames = ref(4)
 const ttsEnabled = ref(false)
@@ -758,61 +768,8 @@ const attachedImages = ref<AttachedImage[]>([])
 const fileInputRef = ref<HTMLInputElement>()
 const MAX_IMAGES = 4
 
-// ──────────── 工具列表（从后端加载） ────────────
-const toolList = ref<ToolRegistryItem[]>([])
-
-// ──────────── 模型列表（从后端加载） ────────────
-const modelList = ref<ModelConfigItem[]>([])
-
-// ──────────── 工作流列表（从后端加载） ────────────
-const workflowList = ref<WorkflowTemplateItem[]>([])
-
-// ──────────── Prompt 列表（从后端加载） ────────────
-const promptList = ref<AgentPromptItem[]>([])
-
 // ──────────── WebSocket 实例 ────────────
 const agentWS = new ComicAgentWS()
-
-// ──────────── 可用 Agent 模型（从模型列表中筛选） ────────────
-const enabledAgentModels = computed(() =>
-  modelList.value.filter(m => m.is_enabled && (m.category === 'agent_brain' || m.category === 'l1_llm'))
-)
-
-function executorTagType(type: string): string {
-  return { comfyui: 'primary', tts: 'success', local: 'info', http: 'warning' }[type] || 'info'
-}
-
-function categoryTagType(cat: string): string {
-  const m: Record<string, string> = {
-    agent_brain: 'danger', l1_llm: 'warning', multimodal: 'warning',
-    embedding: 'info', generation: 'success',
-  }
-  return m[cat] || 'info'
-}
-
-function categoryLabel(cat: string): string {
-  const m: Record<string, string> = {
-    agent_brain: 'Agent 大脑', l1_llm: '轻量 LLM', multimodal: '多模态',
-    embedding: 'Embedding', generation: 'GPU 生成',
-  }
-  return m[cat] || cat
-}
-
-function wfCategoryTagType(cat: string): string {
-  const m: Record<string, string> = {
-    t2i: 'primary', edit: 'warning', face: 'danger',
-    i2v: 'success', t2v: 'success', upscale: 'info', audio: '',
-  }
-  return m[cat] || 'info'
-}
-
-function wfCategoryLabel(cat: string): string {
-  const m: Record<string, string> = {
-    t2i: '文生图', edit: '图像编辑', face: '人脸保持',
-    i2v: '图生视频', t2v: '文生视频', upscale: '超分辨率', audio: '音频',
-  }
-  return m[cat] || cat
-}
 
 // ──────────── 快捷提示 ────────────
 const quickPrompts = [
@@ -915,85 +872,6 @@ function approveTaskStep(step: TaskStep, action: 'approve' | 'reject') {
   agentWS.sendRaw({ action, tool_call_id: step.toolCallId })
 }
 
-// 工具执行耗时计时器
-const elapsedTick = ref(0)
-let elapsedTimer: ReturnType<typeof setInterval> | null = null
-
-function startElapsedTimer() {
-  if (elapsedTimer) return
-  elapsedTimer = setInterval(() => { elapsedTick.value++ }, 1000)
-}
-function stopElapsedTimer() {
-  if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null }
-}
-
-function toolElapsed(timestamp?: string): string {
-  if (!timestamp) return ''
-  // 触发响应式更新
-  void elapsedTick.value
-  const sec = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000)
-  if (sec < 1) return ''
-  return sec < 60 ? `${sec}s` : `${Math.floor(sec / 60)}m${sec % 60}s`
-}
-
-// ──────────── 参数精简展示 ────────────
-function compactParams(input: Record<string, any>): Record<string, string> {
-  const result: Record<string, string> = {}
-  for (const [k, v] of Object.entries(input)) {
-    if (v === undefined || v === null || v === '') continue
-    const str = typeof v === 'string' ? v : JSON.stringify(v)
-    result[k] = str.length > 80 ? str.slice(0, 77) + '...' : str
-  }
-  return result
-}
-
-// ──────────── 渲染 ────────────
-function renderMarkdown(raw: string): string {
-  // 1. HTML 沙箱：```html ... ``` 渲染为 iframe srcdoc
-  const blocks: string[] = []
-  let text = raw.replace(/```(?:html|HTML)\n([\s\S]*?)\n```/g, (_, html) => {
-    const srcdoc = html.trim()
-      .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
-    const idx = blocks.length
-    blocks.push(`<div class="html-sandbox-wrap"><iframe class="html-sandbox" srcdoc="${srcdoc}" sandbox="allow-scripts allow-same-origin" frameborder="0"></iframe></div>`)
-    return `\x00BLOCK${idx}\x00`
-  })
-
-  // 2. 转义普通 HTML 字符
-  text = text
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-
-  // 3. 表格  | col | col |
-  text = text.replace(/((?:\|[^\n]+\|\n?)+)/g, (table) => {
-    const rows = table.trim().split('\n').filter(r => !r.match(/^\|[-:\s|]+\|$/))
-    const html = rows.map((r, i) => {
-      const cells = r.split('|').slice(1, -1).map(c => c.trim())
-      const tag = i === 0 ? 'th' : 'td'
-      return '<tr>' + cells.map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>'
-    }).join('')
-    return `<table class="md-table"><tbody>${html}</tbody></table>`
-  })
-
-  // 4. 内联样式
-  text = text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/^#{3}\s+(.+)$/gm, '<h3>$1</h3>')
-    .replace(/^#{2}\s+(.+)$/gm, '<h2>$1</h2>')
-    .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
-    .replace(/^-\s+(.+)$/gm, '<li>$1</li>')
-    .replace(/\n/g, '<br/>')
-
-  // 5. 还原 HTML 沙箱占位符
-  text = text.replace(/\x00BLOCK(\d+)\x00/g, (_, i) => blocks[Number(i)])
-  return text
-}
-
-function formatTime(ts: string): string {
-  const d = new Date(ts)
-  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-}
 
 function scrollToBottom() {
   nextTick(() => {
@@ -1438,84 +1316,6 @@ async function downloadAllImages() {
     } catch {
       ElMessage.error(`下载第 ${i + 1} 张失败`)
     }
-  }
-}
-
-// ──────────── 初始化：从后端加载配置数据 ────────────
-async function loadConfigData() {
-  const token = localStorage.getItem('access_token')
-  if (!token) return
-
-  try { modelList.value = await fetchModels() }
-  catch (e) { console.warn('[Agent] 模型加载失败', e) }
-
-  try { toolList.value = await fetchTools() }
-  catch (e) { console.warn('[Agent] 工具加载失败', e) }
-
-  try { workflowList.value = await fetchWorkflows() }
-  catch (e) { console.warn('[Agent] 工作流加载失败', e) }
-
-  try { promptList.value = await fetchPrompts() }
-  catch (e) { console.warn('[Agent] Prompt 加载失败', e) }
-
-  // 如果模型列表非空，自动选中默认 agent 模型
-  const defaultAgent = modelList.value.find(m => m.is_enabled && m.is_default && m.category === 'agent_brain')
-  if (defaultAgent) selectedModel.value = defaultAgent.model_id
-}
-
-onMounted(() => {
-  loadConfigData()
-})
-
-// ──────────── 配置 toggle 处理 ────────────
-async function handleToolToggle(id: number, val: boolean) {
-  try { await updateTool(id, { is_enabled: val }) }
-  catch { ElMessage.error('更新失败') }
-}
-
-async function handleModelToggle(id: number, val: boolean) {
-  try { await updateModel(id, { is_enabled: val }) }
-  catch { ElMessage.error('更新失败') }
-}
-
-async function handleSaveModelParams(row: ModelConfigItem) {
-  try {
-    await updateModel(row.id, { model_params: row.model_params || {} })
-    ElMessage.success('模型参数已保存')
-  } catch {
-    ElMessage.error('保存失败')
-  }
-}
-
-async function handleSaveModelConnection(row: ModelConfigItem) {
-  try {
-    await updateModel(row.id, {
-      base_url: row.base_url || '',
-      api_key: row.api_key || '',
-      model_id: row.model_id,
-    })
-    ElMessage.success('服务连接配置已保存')
-  } catch {
-    ElMessage.error('保存失败')
-  }
-}
-
-async function handleWorkflowToggle(id: number, val: boolean) {
-  try { await updateWorkflow(id, { is_enabled: val }) }
-  catch { ElMessage.error('更新失败') }
-}
-
-async function handlePromptToggle(id: number, val: boolean) {
-  try { await updatePrompt(id, { is_enabled: val }) }
-  catch { ElMessage.error('更新失败') }
-}
-
-async function handlePromptSave(p: AgentPromptItem) {
-  try {
-    await updatePrompt(p.id, { content: p.content })
-    ElMessage.success(`Prompt "${p.display_name}" 已保存`)
-  } catch {
-    ElMessage.error('Prompt 保存失败')
   }
 }
 
