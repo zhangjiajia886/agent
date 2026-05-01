@@ -24,7 +24,7 @@ StepExecutor 只执行当前 step
 - [x] 实现步骤状态机（pending → ready → running → succeeded/failed/blocked）。
 - [x] 上游产物收集（`collect_upstream_outputs`）。
 - [x] 保持旧 `agent_runner.py` 兼容入口。
-- [ ] step 级 ReAct 执行（StepExecutor）。
+- [x] step 级执行上下文构建（StepExecutor）。
 - [ ] agent_runner 主循环改造为 Scheduler 驱动。
 
 ## 3. 非目标
@@ -104,9 +104,10 @@ Auditor
 - [x] 实现 `mark_running` / `mark_succeeded` / `mark_failed` / `mark_blocked`。
 - [x] RuntimeStep 增加 `depends_on` 字段。
 - [x] TaskPlanner 写入 `depends_on` 到 RuntimeStep。
-- [ ] 新建 `step_executor.py`。
-- [ ] 改造 `agent_runner.py` 主循环为 Scheduler 驱动。
-- [ ] 保留旧 ReAct fallback。
+- [x] 新建 `step_executor.py`（StepContext + StepExecutor）。
+- [x] 主循环已接入 Scheduler / Replanner / EventTracer。
+- [ ] 改造主循环为完全 Scheduler 驱动。
+- [x] 保留旧 ReAct fallback。
 
 ## 10. 验收标准
 
