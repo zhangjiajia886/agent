@@ -1,0 +1,82 @@
+// ──────────── 抽屉内样式 ────────────
+.drawer-tabs {
+  :deep(.el-tabs__header) {
+    padding: 0 4px;
+  }
+}
+
+.panel-desc {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.config-table {
+  :deep(.el-table__header th) {
+    background: #f5f7fa;
+    font-size: 12px;
+  }
+  :deep(.el-table__body td) {
+    font-size: 13px;
+  }
+}
+
+.code-tag {
+  background: #f5f7fa;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: #606266;
+}
+
+.panel-summary {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #909399;
+  text-align: right;
+}
+
+// ──────────── Prompt 卡片 ────────────
+.prompt-card {
+  background: #fafafa;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+
+  .prompt-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .prompt-card-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    strong { font-size: 13px; color: #303133; }
+  }
+
+  .prompt-card-desc {
+    font-size: 12px;
+    color: #909399;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .prompt-textarea {
+    :deep(.el-textarea__inner) {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      background: #fff;
+      border-color: #dcdfe6;
+      &:focus { border-color: #409eff; }
+    }
+  }
+}

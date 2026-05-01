@@ -137,3 +137,7 @@ defineEmits<{
 
 const fileInputRef = ref<HTMLInputElement>()
 </script>
+
+<style lang="scss">
+@import '../styles/input';
+</style>

@@ -202,3 +202,7 @@ const {
   wfCategoryTagType, wfCategoryLabel,
 } = useConfig()
 </script>
+
+<style lang="scss">
+@import '../styles/drawer';
+</style>

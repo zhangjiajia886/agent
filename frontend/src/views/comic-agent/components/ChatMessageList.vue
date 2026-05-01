@@ -190,3 +190,7 @@ defineEmits<{
   (e: 'tool-approval', msg: AgentMessage, action: 'approve' | 'reject'): void
 }>()
 </script>
+
+<style lang="scss">
+@import '../styles/messages';
+</style>

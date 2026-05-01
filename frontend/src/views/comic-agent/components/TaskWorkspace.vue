@@ -188,3 +188,7 @@ defineEmits<{
   (e: 'approve-step', step: TaskStep, action: 'approve' | 'reject'): void
 }>()
 </script>
+
+<style lang="scss">
+@import '../styles/workspace';
+</style>
