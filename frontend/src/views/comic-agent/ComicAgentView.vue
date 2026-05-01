@@ -17,193 +17,8 @@
       </div>
     </div>
 
-    <!-- ══════════ 设置抽屉：工具 / 模型 / 工作流 ══════════ -->
-    <el-drawer v-model="drawerVisible" title="Agent 配置管理" size="520px" direction="rtl">
-      <el-tabs v-model="drawerTab" class="drawer-tabs">
-
-        <!-- ─── Tab 1: 工具列表 ─── -->
-        <el-tab-pane label="🔧 工具列表" name="tools">
-          <div class="panel-desc">Agent 大脑可调用的 8 大工具能力，每个工具背后对应若干 ComfyUI 工作流（共 {{ workflowList.length }} 个）。</div>
-          <el-table :data="toolList" stripe size="small" class="config-table">
-            <el-table-column prop="display_name" label="工具" min-width="110" />
-            <el-table-column prop="name" label="标识名" min-width="130">
-              <template #default="{ row }">
-                <code class="code-tag">{{ row.name }}</code>
-              </template>
-            </el-table-column>
-            <el-table-column prop="executor_type" label="执行器" width="80">
-              <template #default="{ row }">
-                <el-tag size="small" :type="executorTagType(row.executor_type)">{{ row.executor_type }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="启用" width="60" align="center">
-              <template #default="{ row }">
-                <el-switch v-model="row.is_enabled" size="small" @change="(val: boolean) => handleToolToggle(row.id, val)" />
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="panel-summary">
-            共 {{ toolList.length }} 个 Agent 工具，已启用 {{ toolList.filter(t => t.is_enabled).length }} 个 · 底层 {{ workflowList.length }} 个 ComfyUI 工作流
-          </div>
-        </el-tab-pane>
-
-        <!-- ─── Tab 2: 模型 / 服务 ─── -->
-        <el-tab-pane label="🧠 服务配置" name="models">
-          <div class="panel-desc">Agent 依赖的外部服务（LLM / ComfyUI GPU）。</div>
-          <el-table :data="modelList" stripe size="small" class="config-table">
-            <el-table-column prop="name" label="服务" min-width="160">
-              <template #default="{ row }">
-                <div>
-                  <strong>{{ row.name }}</strong>
-                  <el-tag v-if="row.is_default" size="small" type="success" style="margin-left:4px">默认</el-tag>
-                </div>
-                <div style="font-size:11px;color:#909399;margin-top:2px">{{ row.model_id }}</div>
-                <div v-if="row.base_url" style="font-size:10px;color:#c0c4cc;margin-top:1px;word-break:break-all">{{ row.base_url }}</div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="category" label="用途" width="90">
-              <template #default="{ row }">
-                <el-tag size="small" :type="categoryTagType(row.category)">{{ categoryLabel(row.category) }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="参数" width="70" align="center">
-              <template #default="{ row }">
-                <el-popover v-if="['agent_brain', 'l1_llm'].includes(row.category)" trigger="click" width="340" placement="left">
-                  <template #reference>
-                    <el-button size="small" link type="primary">编辑</el-button>
-                  </template>
-                  <div style="font-size:13px;margin-bottom:8px;font-weight:600">模型参数</div>
-                  <el-form size="small" label-width="120px" label-position="left">
-                    <el-form-item label="max_tokens">
-                      <el-input-number v-model="(row.model_params = row.model_params || {}).max_tokens"
-                        :min="256" :max="200000" :step="512" size="small" style="width:100%" controls-position="right" />
-                    </el-form-item>
-                    <el-form-item label="temperature">
-                      <el-slider v-model="(row.model_params = row.model_params || {}).temperature"
-                        :min="0" :max="2" :step="0.1" show-input size="small" />
-                    </el-form-item>
-                    <el-form-item label="top_p">
-                      <el-slider v-model="(row.model_params = row.model_params || {}).top_p"
-                        :min="0" :max="1" :step="0.05" show-input size="small" />
-                    </el-form-item>
-                    <el-form-item label="freq_penalty">
-                      <el-slider v-model="(row.model_params = row.model_params || {}).frequency_penalty"
-                        :min="-2" :max="2" :step="0.1" show-input size="small" />
-                    </el-form-item>
-                    <el-form-item label="pres_penalty">
-                      <el-slider v-model="(row.model_params = row.model_params || {}).presence_penalty"
-                        :min="-2" :max="2" :step="0.1" show-input size="small" />
-                    </el-form-item>
-                  </el-form>
-                  <el-button size="small" type="primary" style="width:100%" @click="handleSaveModelParams(row)">保存</el-button>
-                </el-popover>
-                <span v-else style="color:#c0c4cc">-</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="配置" width="70" align="center">
-              <template #default="{ row }">
-                <el-popover trigger="click" width="400" placement="left">
-                  <template #reference>
-                    <el-button size="small" link type="warning">配置</el-button>
-                  </template>
-                  <div style="font-size:13px;margin-bottom:8px;font-weight:600">服务连接配置</div>
-                  <el-form size="small" label-width="80px" label-position="left">
-                    <el-form-item label="Base URL">
-                      <el-input v-model="row.base_url" placeholder="https://..." clearable />
-                    </el-form-item>
-                    <el-form-item label="API Key">
-                      <el-input v-model="row.api_key" placeholder="sk-..." show-password clearable />
-                    </el-form-item>
-                    <el-form-item label="Model ID">
-                      <el-input v-model="row.model_id" placeholder="模型标识符" clearable />
-                    </el-form-item>
-                  </el-form>
-                  <el-button size="small" type="primary" style="width:100%" @click="handleSaveModelConnection(row)">保存</el-button>
-                </el-popover>
-              </template>
-            </el-table-column>
-            <el-table-column label="启用" width="60" align="center">
-              <template #default="{ row }">
-                <el-switch v-model="row.is_enabled" size="small" @change="(val: boolean) => handleModelToggle(row.id, val)" />
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="panel-summary">
-            共 {{ modelList.length }} 个服务，已启用 {{ modelList.filter(m => m.is_enabled).length }} 个
-          </div>
-        </el-tab-pane>
-
-        <!-- ─── Tab 3: 工作流模板 ─── -->
-        <el-tab-pane label="📋 工作流模板" name="workflows">
-          <div class="panel-desc">ComfyUI 工作流模板，Agent 的工具层根据参数自动匹配合适的工作流。</div>
-          <el-table :data="workflowList" stripe size="small" class="config-table">
-            <el-table-column prop="display_name" label="工作流" min-width="130">
-              <template #default="{ row }">
-                <div><strong>{{ row.display_name }}</strong></div>
-                <div style="font-size:11px;color:#909399;margin-top:2px">
-                  <code class="code-tag">{{ row.name }}</code>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="category" label="类型" width="75">
-              <template #default="{ row }">
-                <el-tag size="small" :type="wfCategoryTagType(row.category)">{{ wfCategoryLabel(row.category) }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="style_tag" label="风格" width="70">
-              <template #default="{ row }">
-                <span v-if="row.style_tag">{{ row.style_tag }}</span>
-                <span v-else style="color:#c0c4cc">—</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="test_time" label="测试耗时" width="80" align="right">
-              <template #default="{ row }">
-                <span style="font-family:monospace;font-size:12px">{{ row.test_time ? (row.test_time / 10).toFixed(1) : '—' }}s</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="启用" width="60" align="center">
-              <template #default="{ row }">
-                <el-switch v-model="row.is_enabled" size="small" @change="(val: boolean) => handleWorkflowToggle(row.id, val)" />
-              </template>
-            </el-table-column>
-          </el-table>
-          <div class="panel-summary">
-            共 {{ workflowList.length }} 个工作流，已启用 {{ workflowList.filter(w => w.is_enabled).length }} 个
-          </div>
-        </el-tab-pane>
-
-        <!-- ─── Tab 4: Prompt 管理 ─── -->
-        <el-tab-pane label="📝 Prompt 管理" name="prompts">
-          <div class="panel-desc">各节点的 System / User 模板 Prompt。点击内容区域可编辑。</div>
-          <div v-for="p in promptList" :key="p.id" class="prompt-card">
-            <div class="prompt-card-header">
-              <div class="prompt-card-title">
-                <strong>{{ p.display_name }}</strong>
-                <el-tag size="small" :type="p.prompt_type === 'system' ? 'danger' : 'warning'" style="margin-left:6px">
-                  {{ p.prompt_type === 'system' ? 'System' : 'User 模板' }}
-                </el-tag>
-                <el-tag size="small" type="info" style="margin-left:4px">
-                  {{ p.node_name }}
-                </el-tag>
-              </div>
-              <el-switch v-model="p.is_enabled" size="small" @change="(val: boolean) => handlePromptToggle(p.id, val)" />
-            </div>
-            <div v-if="p.description" class="prompt-card-desc">{{ p.description }}</div>
-            <el-input
-              v-model="p.content"
-              type="textarea"
-              :autosize="{ minRows: 3, maxRows: 15 }"
-              class="prompt-textarea"
-              @blur="handlePromptSave(p)"
-            />
-          </div>
-          <div class="panel-summary">
-            共 {{ promptList.length }} 个 Prompt，已启用 {{ promptList.filter(p => p.is_enabled).length }} 个
-          </div>
-        </el-tab-pane>
-
-      </el-tabs>
-    </el-drawer>
+    <!-- ══════════ 设置抽屉 ══════════ -->
+    <SettingsDrawer v-model="drawerVisible" v-model:tab="drawerTab" />
 
     <!-- 消息区域 -->
     <div class="messages-area" ref="messagesRef">
@@ -227,166 +42,23 @@
         </div>
       </div>
 
-      <section v-if="activeTask" class="agent-workspace agent-workspace--narrative">
-        <section class="narrative-block narrative-block--primary">
-          <div class="block-marker">01</div>
-          <div class="block-main">
-            <div class="block-head">
-              <div>
-                <span class="section-kicker">Requirement Understanding</span>
-                <h2>需求理解</h2>
-              </div>
-              <el-tag :type="taskStatusType(activeTask.status)" effect="dark">
-                {{ taskStatusLabel(activeTask.status) }}
-              </el-tag>
-            </div>
-            <div class="requirement-card">
-              <div class="requirement-label">用户需求</div>
-              <div class="requirement-text">{{ activeTask.userRequest }}</div>
-            </div>
-            <div class="understanding-grid">
-              <div>
-                <span>识别类型</span>
-                <strong>{{ activeTask.intent }}</strong>
-              </div>
-              <div>
-                <span>目标摘要</span>
-                <strong>{{ activeTask.analysis }}</strong>
-              </div>
-              <div>
-                <span>当前状态</span>
-                <strong>{{ activeTask.currentStage }}</strong>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section v-if="showPlanBlock" class="narrative-block">
-          <div class="block-marker">02</div>
-          <div class="block-main">
-            <div class="block-head">
-              <div>
-                <span class="section-kicker">Plan</span>
-                <h2>执行规划</h2>
-              </div>
-              <span class="progress-text">{{ completedStepCount }}/{{ activeTask.steps.length }} 已完成</span>
-            </div>
-            <div class="plan-list">
-              <div v-for="(step, index) in visiblePlanSteps" :key="step.id" :class="['plan-row', `plan-row--${step.status}`]">
-                <span class="plan-index">{{ index + 1 }}</span>
-                <div class="plan-copy">
-                  <strong>{{ step.title }}</strong>
-                  <p>{{ step.description }}</p>
-                </div>
-                <el-tag size="small" :type="stepStatusType(step.status)">{{ stepStatusLabel(step.status) }}</el-tag>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section v-if="showExecutionBlock" class="narrative-block">
-          <div class="block-marker">03</div>
-          <div class="block-main">
-            <div class="block-head">
-              <div>
-                <span class="section-kicker">Execution</span>
-                <h2>执行过程</h2>
-              </div>
-            </div>
-            <div class="execution-flow">
-              <article
-                v-for="(step, index) in executableSteps"
-                :key="step.id"
-                :class="['execution-card', `execution-card--${step.status}`]"
-              >
-                <div class="execution-card-head">
-                  <div>
-                    <span>Step {{ index + 1 }}</span>
-                    <h3>{{ step.title }}</h3>
-                  </div>
-                  <el-tag size="small" :type="stepStatusType(step.status)">{{ stepStatusLabel(step.status) }}</el-tag>
-                </div>
-                <p>{{ step.description }}</p>
-                <div v-if="step.startedAt || step.finishedAt" class="step-meta">
-                  <span v-if="step.startedAt">开始 {{ formatTime(step.startedAt) }}</span>
-                  <span v-if="step.finishedAt">完成 {{ formatTime(step.finishedAt) }}</span>
-                </div>
-                <div v-if="step.status === 'awaiting_approval'" class="inline-approval">
-                  <el-button type="primary" size="small" @click="approveTaskStep(step, 'approve')">确认执行</el-button>
-                  <el-button type="danger" size="small" plain @click="approveTaskStep(step, 'reject')">取消操作</el-button>
-                </div>
-                <el-collapse v-if="stepLogs(step).length" class="compact-tool-collapse">
-                  <el-collapse-item>
-                    <template #title>
-                      <span>工具调用明细已压缩 · {{ stepLogs(step).length }} 条</span>
-                    </template>
-                    <div class="compact-log-list">
-                      <div v-for="log in stepLogs(step)" :key="log.id" class="compact-log-item">
-                        <div class="compact-log-title">
-                          <span>{{ log.title }}</span>
-                          <em>{{ formatTime(log.timestamp) }}</em>
-                        </div>
-                        <pre>{{ compactLogContent(log.content) }}</pre>
-                      </div>
-                    </div>
-                  </el-collapse-item>
-                </el-collapse>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section v-if="showResultBlock" class="narrative-block">
-          <div class="block-marker">04</div>
-          <div class="block-main">
-            <div class="block-head">
-              <div>
-                <span class="section-kicker">Result Analysis</span>
-                <h2>结果分析</h2>
-              </div>
-            </div>
-            <div class="result-strip">
-              <div v-for="item in activeTask.artifacts" :key="item.id" class="result-card">
-                <el-image
-                  v-if="item.type === 'image'"
-                  :src="item.url"
-                  fit="cover"
-                  class="result-preview"
-                  :preview-src-list="allImageUrls"
-                  :initial-index="allImageUrls.indexOf(item.url)"
-                />
-                <video v-else-if="item.type === 'video'" :src="item.url" controls class="result-video"></video>
-                <div v-else class="result-file">{{ item.type === 'audio' ? '音频产物' : '文件产物' }}</div>
-                <div class="result-copy">
-                  <strong>{{ item.title }}</strong>
-                  <span>{{ item.fromStep }}</span>
-                </div>
-              </div>
-            </div>
-            <div class="analysis-panel">
-              {{ resultAnalysisText }}
-            </div>
-          </div>
-        </section>
-
-        <section v-if="showFinalBlock" class="narrative-block narrative-block--final">
-          <div class="block-marker">05</div>
-          <div class="block-main">
-            <div class="block-head">
-              <div>
-                <span class="section-kicker">Final Report</span>
-                <h2>总结报告</h2>
-              </div>
-            </div>
-            <div class="final-report" v-html="renderMarkdown(finalReportText)"></div>
-            <div v-if="visibleAssistantMessages.length" class="assistant-final-messages">
-              <div v-for="msg in visibleAssistantMessages" :key="msg.id" class="summary-message">
-                <div v-if="msg.content" v-html="renderMarkdown(msg.content || '')"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </section>
+      <TaskWorkspace
+        :active-task="activeTask"
+        :show-plan-block="showPlanBlock"
+        :show-execution-block="showExecutionBlock"
+        :show-result-block="showResultBlock"
+        :show-final-block="showFinalBlock"
+        :completed-step-count="completedStepCount"
+        :visible-plan-steps="visiblePlanSteps"
+        :executable-steps="executableSteps"
+        :all-image-urls="allImageUrls"
+        :result-analysis-text="resultAnalysisText"
+        :final-report-text="finalReportText"
+        :visible-assistant-messages="visibleAssistantMessages"
+        :step-logs="stepLogs"
+        :compact-log-content="compactLogContent"
+        @approve-step="approveTaskStep"
+      />
 
       <!-- 消息列表 -->
       <div
@@ -706,25 +378,17 @@ import {
   useConfig,
   useChat,
   toolDisplayName, toolHint,
-  taskStatusLabel, taskStatusType,
-  stepStatusLabel, stepStatusType,
 } from './composables'
 import { renderMarkdown, formatTime, compactParams } from './utils'
+import SettingsDrawer from './components/SettingsDrawer.vue'
+import TaskWorkspace from './components/TaskWorkspace.vue'
 
 // ──────────── 任务管理 (composable) ────────────
 const task = useTask()
 const { activeTask, stepLogs, compactLogContent } = task
 
 // ──────────── 配置管理 (composable) ────────────
-const {
-  toolList, modelList, workflowList, promptList,
-  selectedModel, enabledAgentModels,
-  handleToolToggle, handleModelToggle,
-  handleSaveModelParams, handleSaveModelConnection,
-  handleWorkflowToggle, handlePromptToggle, handlePromptSave,
-  executorTagType, categoryTagType, categoryLabel,
-  wfCategoryTagType, wfCategoryLabel,
-} = useConfig()
+const { selectedModel, enabledAgentModels } = useConfig()
 
 // ──────────── 耗时计时器 (composable) ────────────
 const elapsed = useElapsed()

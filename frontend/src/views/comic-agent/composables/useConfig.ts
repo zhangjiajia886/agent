@@ -13,41 +13,42 @@ import {
   type AgentPromptItem,
 } from '@/api/comic-agent'
 
+// ──────────── 模块级单例状态（父子组件共享） ────────────
+const toolList = ref<ToolRegistryItem[]>([])
+const modelList = ref<ModelConfigItem[]>([])
+const workflowList = ref<WorkflowTemplateItem[]>([])
+const promptList = ref<AgentPromptItem[]>([])
+const selectedModel = ref('claude-sonnet-4-6')
+const enabledAgentModels = computed(() =>
+  modelList.value.filter(m => m.is_enabled && (m.category === 'agent_brain' || m.category === 'l1_llm'))
+)
+
+let _loaded = false
+async function loadConfigData() {
+  const token = localStorage.getItem('access_token')
+  if (!token) return
+
+  try { modelList.value = await fetchModels() }
+  catch (e) { console.warn('[Agent] 模型加载失败', e) }
+
+  try { toolList.value = await fetchTools() }
+  catch (e) { console.warn('[Agent] 工具加载失败', e) }
+
+  try { workflowList.value = await fetchWorkflows() }
+  catch (e) { console.warn('[Agent] 工作流加载失败', e) }
+
+  try { promptList.value = await fetchPrompts() }
+  catch (e) { console.warn('[Agent] Prompt 加载失败', e) }
+
+  const defaultAgent = modelList.value.find(m => m.is_enabled && m.is_default && m.category === 'agent_brain')
+  if (defaultAgent) selectedModel.value = defaultAgent.model_id
+}
+
 export function useConfig() {
-  const toolList = ref<ToolRegistryItem[]>([])
-  const modelList = ref<ModelConfigItem[]>([])
-  const workflowList = ref<WorkflowTemplateItem[]>([])
-  const promptList = ref<AgentPromptItem[]>([])
-  const selectedModel = ref('claude-sonnet-4-6')
-
-  // ──────────── 可用 Agent 模型 ────────────
-  const enabledAgentModels = computed(() =>
-    modelList.value.filter(m => m.is_enabled && (m.category === 'agent_brain' || m.category === 'l1_llm'))
-  )
-
-  // ──────────── 加载 ────────────
-  async function loadConfigData() {
-    const token = localStorage.getItem('access_token')
-    if (!token) return
-
-    try { modelList.value = await fetchModels() }
-    catch (e) { console.warn('[Agent] 模型加载失败', e) }
-
-    try { toolList.value = await fetchTools() }
-    catch (e) { console.warn('[Agent] 工具加载失败', e) }
-
-    try { workflowList.value = await fetchWorkflows() }
-    catch (e) { console.warn('[Agent] 工作流加载失败', e) }
-
-    try { promptList.value = await fetchPrompts() }
-    catch (e) { console.warn('[Agent] Prompt 加载失败', e) }
-
-    // 自动选中默认 agent 模型
-    const defaultAgent = modelList.value.find(m => m.is_enabled && m.is_default && m.category === 'agent_brain')
-    if (defaultAgent) selectedModel.value = defaultAgent.model_id
+  if (!_loaded) {
+    _loaded = true
+    onMounted(() => { loadConfigData() })
   }
-
-  onMounted(() => { loadConfigData() })
 
   // ──────────── Toggle 处理 ────────────
   async function handleToolToggle(id: number, val: boolean) {
