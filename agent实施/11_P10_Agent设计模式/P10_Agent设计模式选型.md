@@ -1,7 +1,7 @@
 # P10 Agent 设计模式选型
 
 > 所属阶段：P10  
-> 状态：待实施  
+> 状态：Protocol 接口已落地  
 > 目标：系统梳理 ttsapp 漫剧 Agent 应采用、暂缓采用和不建议采用的 Agent 设计模式，并明确每种模式对应的工程模块。
 
 ---
@@ -14,11 +14,12 @@
 
 ## 2. 目标
 
-- [ ] 明确当前已采用的设计模式。
-- [ ] 明确必须引入的设计模式。
-- [ ] 明确暂缓采用的设计模式。
-- [ ] 明确每种模式对应的模块和阶段。
-- [ ] 明确与 LangChain/LangGraph/CrewAI/AutoGen 等方案的取舍。
+- [x] 明确当前已采用的设计模式。
+- [x] 明确必须引入的设计模式。
+- [x] 明确暂缓采用的设计模式。
+- [x] 明确每种模式对应的模块和阶段。
+- [x] 明确与 LangChain/LangGraph/CrewAI/AutoGen 等方案的取舍。
+- [x] 定义核心模块 Protocol 接口（`agent_protocols.py`）。
 
 ## 3. 已采用模式
 
@@ -202,18 +203,38 @@ Event Stream + DB/Redis
 | P5 | Replanner / RecoveryPolicy |
 | P6 | Event Replay / Tracing |
 
-## 9. TODO
+## 9. Protocol 接口清单
 
-- [ ] 在 README 中加入 P10。
+已定义于 `backend/app/core/comic_chat_agent/agent_protocols.py`：
+
+| Protocol | 对应阶段 | 说明 |
+|---|---|---|
+| `TaskPlannerProtocol` | P2 | 接收用户目标，返回 RuntimeTask |
+| `StepSchedulerProtocol` | P3 | 从 TaskGraph 选出 ready steps |
+| `StepExecutorProtocol` | P3 | 单步执行，返回 ToolResult |
+| `CompletionAuditorProtocol` | P4 | 规则审计任务完成度 |
+| `ReplannerProtocol` | P5 | 失败恢复决策 |
+| `EventReplayerProtocol` | P6 | 断线恢复事件回放 |
+
+辅助数据类：
+
+- `AuditResult`：审计结果。
+- `RecoveryDecision`：恢复策略决策。
+
+## 10. TODO
+
+- [x] 在 README 中加入 P10。
+- [x] 定义核心模块 Protocol 接口。
 - [ ] 后续实现模块时标注采用的设计模式。
 - [ ] P2 Planner 实施前复核 Plan-and-Execute 边界。
 - [ ] P3 Scheduler 实施前复核 State Machine 状态转移。
 - [ ] P4 Auditor 实施前补 Observer/Verifier 子设计。
 - [ ] P5 Replanner 实施前补 RecoveryPolicy 决策表。
 
-## 10. 验收标准
+## 11. 验收标准
 
-- [ ] 每个核心阶段都能对应至少一种设计模式。
-- [ ] 不再用“加 prompt”解决结构性问题。
-- [ ] Multi-Agent / LangGraph 等复杂方案有明确暂缓理由。
-- [ ] 最终架构图能解释 Agent 从用户目标到最终报告的完整链路。
+- [x] 每个核心阶段都能对应至少一种设计模式。
+- [x] 不再用"加 prompt"解决结构性问题。
+- [x] Multi-Agent / LangGraph 等复杂方案有明确暂缓理由。
+- [x] 最终架构图能解释 Agent 从用户目标到最终报告的完整链路。
+- [x] 核心模块 Protocol 接口已定义，后续模块实现时可直接引用。
