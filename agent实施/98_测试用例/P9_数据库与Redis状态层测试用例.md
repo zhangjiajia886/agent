@@ -26,6 +26,10 @@
   - [ ] 第二次被拒绝或等待
   - [ ] lock TTL 可续期
   - [ ] 任务结束后 lock 删除
+- **最小实现对应方法**：
+  - `AgentStateStore.acquire_task_lock`
+  - `AgentStateStore.renew_task_lock`
+  - `AgentStateStore.release_task_lock`
 
 ## 用例 4：Redis approval 状态
 
@@ -34,6 +38,9 @@
   - [ ] 写入 `agent:task:{task_uid}:approval`
   - [ ] 用户确认后删除 key
   - [ ] 超时后 key 过期并触发 reject/timeout
+- **最小实现对应方法**：
+  - `AgentStateStore.set_approval_waiting`
+  - `AgentStateStore.clear_approval`
 
 ## 用例 5：Redis budget counter
 
@@ -42,6 +49,9 @@
   - [ ] Redis 计数递增
   - [ ] 达到预算上限后阻止或 ask_user
   - [ ] 任务结束后 usage 写入 DB
+- **最小实现对应方法**：
+  - `AgentStateStore.increment_budget_counter`
+  - `AgentStateStore.clear_budget_counter`
 
 ## 用例 6：Redis 丢失恢复
 
@@ -58,3 +68,6 @@
   - [ ] 首次检查写入 Redis health key
   - [ ] TTL 内复用缓存
   - [ ] TTL 后重新检查
+- **最小实现对应方法**：
+  - `AgentStateStore.set_tool_health`
+  - `AgentStateStore.get_tool_health`

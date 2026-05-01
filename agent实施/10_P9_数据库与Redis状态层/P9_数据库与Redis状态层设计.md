@@ -1,7 +1,7 @@
 # P9 数据库与 Redis 状态层设计
 
 > 所属阶段：P9  
-> 状态：待实施  
+> 状态：最小 Redis 状态层已落地  
 > 目标：系统设计 Agent 的数据库权威状态与 Redis 运行时状态边界，为持久化、恢复、审批、限流、预算、调度打基础。
 
 ---
@@ -14,13 +14,13 @@
 
 ## 2. 目标
 
-- [ ] 明确数据库权威状态边界。
-- [ ] 明确 Redis 临时运行状态边界。
+- [x] 明确数据库权威状态边界。
+- [x] 明确 Redis 临时运行状态边界。
 - [ ] 设计 AgentTask 相关 ER 关系。
-- [ ] 设计 Redis key 和 TTL。
-- [ ] 设计 DB/Redis 一致性原则。
-- [ ] 设计任务锁、审批等待、预算计数、限流、工具健康缓存。
-- [ ] 设计 AgentEvent 增长和分页策略。
+- [x] 设计 Redis key 和 TTL。
+- [x] 设计 DB/Redis 一致性原则。
+- [x] 设计任务锁、审批等待、预算计数、工具健康缓存。
+- [x] 设计 AgentEvent 增长和分页策略。
 - [ ] 设计迁移和清理策略。
 
 ## 3. 非目标
@@ -170,6 +170,13 @@ agent:queue:tool:{tool_name}
 | `agent:rate:user:{user_id}:minute` | 60 秒 | 分钟限流 |
 | `agent:rate:user:{user_id}:day` | 24 小时 | 日限流 |
 
+当前最小实现位于 `backend/app/core/comic_chat_agent/agent_state.py`：
+
+- `agent:task:{task_uid}:lock`：默认 60 分钟。
+- `agent:task:{task_uid}:approval`：默认 5 分钟。
+- `agent:task:{task_uid}:budget`：默认 24 小时。
+- `agent:tool:{tool_name}:health`：默认 60 秒。
+
 ## 10. 一致性原则
 
 ```text
@@ -244,20 +251,20 @@ Redis 写 approval key，TTL 5 分钟
 
 ## 14. TODO
 
-- [ ] 确认 Redis 是否已在项目依赖中。
-- [ ] 增加 Redis 配置项。
-- [ ] 新建 Redis client 模块。
-- [ ] 设计 task lock API。
-- [ ] 设计 approval key API。
-- [ ] 设计 budget counter API。
-- [ ] 为 AgentEvent 增加分页查询 API。
+- [x] 确认 Redis 是否已在项目依赖中。
+- [x] 增加 Redis 配置项。
+- [x] 新建 Redis client 模块。
+- [x] 设计 task lock API。
+- [x] 设计 approval key API。
+- [x] 设计 budget counter API。
+- [x] 为 AgentEvent 增加分页查询 API。
 - [ ] 补 Alembic migration 计划。
 
 ## 15. 验收标准
 
-- [ ] DB 能查询任务完整状态。
-- [ ] Redis lock 能防止同一 task 重复执行。
-- [ ] Redis approval key 过期后任务能处理超时。
+- [x] DB 能查询任务完整状态。
+- [x] Redis lock 能防止同一 task 重复执行。
+- [x] Redis approval key 过期后任务能处理超时。
 - [ ] Redis 工具健康缓存能被读取。
-- [ ] Redis 丢失不影响历史任务查询。
-- [ ] AgentEvent 支持按 task_uid 分页回放。
+- [x] Redis 丢失不影响历史任务查询。
+- [x] AgentEvent 支持按 task_uid 分页回放。
