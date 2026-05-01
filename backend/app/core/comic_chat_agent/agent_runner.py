@@ -13,6 +13,7 @@ from loguru import logger
 from app.models.agent_config import ModelConfig, ToolRegistry
 from app.models.agent_prompt import AgentPrompt
 from .openai_client import OpenAICompatClient, LLMResponse, LLMStreamChunk
+from .agent_state import AgentStateStore
 from .tool_executor import execute_tool
 from .tool_result import normalize_tool_result
 from .task_store import AgentTaskStore
@@ -426,6 +427,12 @@ async def agent_stream(
     model_name = model_config.model_id
     runtime_task = create_runtime_task(user_message)
     task_store = AgentTaskStore() if conversation_id else None
+    state_store = AgentStateStore()
+    lock_owner = f"conversation:{conversation_id or 0}:user:{user_id or 0}"
+    lock_acquired = await state_store.acquire_task_lock(runtime_task.task_uid, lock_owner)
+    if not lock_acquired:
+        yield {"type": "error", "task_uid": runtime_task.task_uid, "content": "任务正在运行中，请稍后再试"}
+        return
 
     async def persist_event(event: dict) -> dict:
         if task_store:
@@ -537,6 +544,7 @@ async def agent_stream(
             if task_store:
                 await task_store.update_task(runtime_task, error={"message": str(e), "stage": "llm_call"})
             yield await persist_event({"type": "error", "task_uid": runtime_task.task_uid, "content": f"LLM 调用失败: {e}"})
+            await state_store.release_task_lock(runtime_task.task_uid)
             return
 
         # ── ReAct XML 降级解析 ──
@@ -669,6 +677,13 @@ async def agent_stream(
                 if task_store:
                     await task_store.update_task(runtime_task)
                     await task_store.update_step(runtime_task.task_uid, current_step)
+                await state_store.set_approval_waiting(runtime_task.task_uid, {
+                    "task_uid": runtime_task.task_uid,
+                    "step_uid": current_step.step_uid,
+                    "tool": tc.name,
+                    "tool_call_id": tc.id,
+                    "input": tc.arguments,
+                })
                 yield await persist_event(task_update_event(runtime_task, f"等待确认：{current_step.title}"))
                 yield await persist_event(step_update_event(runtime_task, current_step))
                 yield await persist_event({
@@ -685,6 +700,7 @@ async def agent_stream(
                     approval = await asyncio.wait_for(approval_queue.get(), timeout=300)
                 except asyncio.TimeoutError:
                     approval = {"action": "reject", "reason": "确认超时(5分钟)"}
+                await state_store.clear_approval(runtime_task.task_uid)
 
                 if approval.get("action") != "approve":
                     reason = approval.get("reason", "用户拒绝")
@@ -712,6 +728,8 @@ async def agent_stream(
                     continue
 
             current_step = find_step_for_tool(runtime_task, tc.name)
+            await state_store.increment_budget_counter(runtime_task.task_uid, f"tool:{tc.name}")
+            await state_store.increment_budget_counter(runtime_task.task_uid, "tool_calls")
             current_step.status = "running"
             current_step.inputs = tc.arguments
             runtime_task.status = "running"
@@ -790,3 +808,5 @@ async def agent_stream(
     if task_store:
         await task_store.update_task(runtime_task, final_report=final_event.get("final_report"))
     yield await persist_event(final_event)
+    await state_store.clear_budget_counter(runtime_task.task_uid)
+    await state_store.release_task_lock(runtime_task.task_uid)
