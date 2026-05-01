@@ -11,3 +11,4 @@ export {
 } from './useTask'
 export { useElapsed } from './useElapsed'
 export { useConfig } from './useConfig'
+export { useChat } from './useChat'
