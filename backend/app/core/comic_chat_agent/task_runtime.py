@@ -21,6 +21,7 @@ class RuntimeStep:
     inputs: dict[str, Any] = field(default_factory=dict)
     outputs: dict[str, Any] = field(default_factory=dict)
     error: dict[str, Any] | None = None
+    depends_on: list[str] = field(default_factory=list)
 
 
 @dataclass

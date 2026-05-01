@@ -1,7 +1,7 @@
 # P3 Scheduler 与 StepExecutor 设计
 
 > 所属阶段：P3  
-> 状态：待实施  
+> 状态：最小实现已落地  
 > 目标：让系统调度 TaskGraph，LLM 只执行当前 step。
 
 ---
@@ -19,11 +19,13 @@ StepExecutor 只执行当前 step
 
 ## 2. 目标
 
-- [ ] 实现 ready step 计算。
-- [ ] 实现 step 级 ReAct 执行。
-- [ ] 实现依赖顺序控制。
-- [ ] 初步支持可并行步骤的顺序执行。
-- [ ] 保持旧 `agent_runner.py` 兼容入口。
+- [x] 实现 ready step 计算（`get_ready_steps`）。
+- [x] 实现依赖顺序控制（`_deps_satisfied` / `_deps_blocked`）。
+- [x] 实现步骤状态机（pending → ready → running → succeeded/failed/blocked）。
+- [x] 上游产物收集（`collect_upstream_outputs`）。
+- [x] 保持旧 `agent_runner.py` 兼容入口。
+- [ ] step 级 ReAct 执行（StepExecutor）。
+- [ ] agent_runner 主循环改造为 Scheduler 驱动。
 
 ## 3. 非目标
 
@@ -97,17 +99,19 @@ Auditor
 
 ## 9. TODO
 
-- [ ] 新建 `scheduler.py`。
+- [x] 新建 `task_scheduler.py`。
+- [x] 实现 `get_ready_steps()` / `get_blocked_steps()` / `evaluate()`。
+- [x] 实现 `mark_running` / `mark_succeeded` / `mark_failed` / `mark_blocked`。
+- [x] RuntimeStep 增加 `depends_on` 字段。
+- [x] TaskPlanner 写入 `depends_on` 到 RuntimeStep。
 - [ ] 新建 `step_executor.py`。
-- [ ] 实现 `get_ready_steps()`。
-- [ ] 实现 `mark_ready_steps()`。
-- [ ] 实现 `execute_step()`。
-- [ ] 改造 `agent_runner.py` 主循环。
+- [ ] 改造 `agent_runner.py` 主循环为 Scheduler 驱动。
 - [ ] 保留旧 ReAct fallback。
 
 ## 10. 验收标准
 
-- [ ] 图片未生成前不会执行图生视频。
-- [ ] TTS 和图生视频依赖满足后可执行。
-- [ ] LLM 输出跨步骤计划不会改变 Scheduler 决策。
-- [ ] 每个 step 状态可追踪。
+- [x] `get_ready_steps` 只返回依赖全部 succeeded 的 pending step。
+- [x] 上游 failed 时下游自动 blocked。
+- [x] 每个 step 状态可追踪（status + summary）。
+- [ ] 图片未生成前不会执行图生视频（待主循环改造）。
+- [ ] LLM 输出跨步骤计划不会改变 Scheduler 决策（待主循环改造）。

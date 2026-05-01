@@ -278,6 +278,7 @@ class TaskPlanner:
                 description=ps.description,
                 status="pending",
                 inputs=ps.inputs,
+                depends_on=list(ps.depends_on),
             )
             runtime_steps.append(rs)
         return RuntimeTask(

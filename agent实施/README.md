@@ -49,7 +49,7 @@ agent实施/
 | P9 数据库与 Redis 状态层 | `10_P9_数据库与Redis状态层/P9_数据库与Redis状态层设计.md` | `98_测试用例/P9_数据库与Redis状态层测试用例.md` | **已落地** | Alembic migration / 工具健康缓存接入 |
 | P10 Agent 设计模式 | `11_P10_Agent设计模式/P10_Agent设计模式选型.md` | `98_测试用例/P10_Agent设计模式验证用例.md` | **已落地** | 后续模块实施时标注设计模式 |
 | P2 TaskPlanner | `03_P2_Planner/P2_TaskPlanner设计.md` | `98_测试用例/P2_Planner测试用例.md` | **已落地** | style/image_paths 参数 / depends_on 持久化 |
-| P3 Scheduler / Executor | `04_P3_Scheduler_Executor/P3_Scheduler与StepExecutor设计.md` | `98_测试用例/P3_Scheduler测试用例.md` | 待实施 | 实现 ready step 计算 |
+| P3 Scheduler / Executor | `04_P3_Scheduler_Executor/P3_Scheduler与StepExecutor设计.md` | `98_测试用例/P3_Scheduler测试用例.md` | **已落地** | StepExecutor / 主循环改造 |
 | P4 CompletionAuditor | `05_P4_Auditor/P4_CompletionAuditor设计.md` | `98_测试用例/P4_Auditor测试用例.md` | 待实施 | 独立审计规则 |
 | P5 Replanner | `06_P5_Replanner/P5_Replanner与RecoveryPolicy设计.md` | `98_测试用例/P5_Replanner测试用例.md` | 待实施 | 定义 retry/fallback/ask_user |
 | P6 恢复与观测 | `07_P6_恢复与观测/P6_断线恢复事件回放与Tracing设计.md` | `98_测试用例/P6_恢复与观测测试用例.md` | 待实施 | 事件回放和任务控制 API |
