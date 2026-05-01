@@ -51,10 +51,10 @@ agent实施/
 | P2 TaskPlanner | `03_P2_Planner/P2_TaskPlanner设计.md` | `98_测试用例/P2_Planner测试用例.md` | **已落地** | style/image_paths 参数 / depends_on 持久化 |
 | P3 Scheduler / Executor | `04_P3_Scheduler_Executor/P3_Scheduler与StepExecutor设计.md` | `98_测试用例/P3_Scheduler测试用例.md` | **已落地 + 主循环集成** | — |
 | P4 CompletionAuditor | `05_P4_Auditor/P4_CompletionAuditor设计.md` | `98_测试用例/P4_Auditor测试用例.md` | **已落地** | artifact 校验 / Reporter 独立模块 |
-| P5 Replanner | `06_P5_Replanner/P5_Replanner与RecoveryPolicy设计.md` | `98_测试用例/P5_Replanner测试用例.md` | **已落地** | 前端 ask_user / 集成 agent_runner |
-| P6 恢复与观测 | `07_P6_恢复与观测/P6_断线恢复事件回放与Tracing设计.md` | `98_测试用例/P6_恢复与观测测试用例.md` | **已落地** | 前端回放 / retry API / 统计 |
+| P5 Replanner | `06_P5_Replanner/P5_Replanner与RecoveryPolicy设计.md` | `98_测试用例/P5_Replanner测试用例.md` | **已落地 + 主循环集成** | 前端 ask_user UI |
+| P6 恢复与观测 | `07_P6_恢复与观测/P6_断线恢复事件回放与Tracing设计.md` | `98_测试用例/P6_恢复与观测测试用例.md` | **已落地 + retry API** | 前端回放 UI |
 | P7 沙箱与安全 | `08_P7_沙箱与安全/P7_Sandbox与安全隔离设计.md` | `98_测试用例/P7_Sandbox安全测试用例.md` | **已落地** | 审计事件持久化 / 自动化测试 |
-| P8 工具治理 | `09_P8_工具治理/P8_工具治理设计.md` | `98_测试用例/P8_工具治理测试用例.md` | **已落地** | 健康检查 / 工具统计 / API 暴露 |
+| P8 工具治理 | `09_P8_工具治理/P8_工具治理设计.md` | `98_测试用例/P8_工具治理测试用例.md` | **已落地 + API** | 前端工具管理 UI |
 | P11 成本与预算控制 | `12_P11_成本与预算控制/P11_成本与预算控制设计.md` | `98_测试用例/P11_成本预算测试用例.md` | **已落地** | 前端预算展示 / budget_warning 事件 |
 
 ---

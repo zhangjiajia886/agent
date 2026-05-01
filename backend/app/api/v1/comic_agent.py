@@ -882,6 +882,82 @@ async def get_task_trace(
     }
 
 
+@router.post("/tasks/{task_uid}/steps/{step_uid}/retry")
+async def retry_task_step(
+    task_uid: str,
+    step_uid: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """重试指定步骤（将 failed 步骤重置为 pending）"""
+    await _get_owned_task(task_uid, db, current_user)
+    step_result = await db.execute(
+        select(AgentStep).where(
+            AgentStep.task_uid == task_uid,
+            AgentStep.step_uid == step_uid,
+        )
+    )
+    step = step_result.scalar_one_or_none()
+    if not step:
+        raise HTTPException(404, "步骤不存在")
+    if step.status not in ("failed", "blocked"):
+        raise HTTPException(400, f"步骤状态 {step.status} 不可重试，仅 failed/blocked 可重试")
+    step.status = "pending"
+    step.error = None
+    await db.commit()
+    return {"task_uid": task_uid, "step_uid": step_uid, "status": "pending"}
+
+
+@router.get("/tools/health")
+async def check_tools_health(
+    current_user: User = Depends(get_current_user),
+):
+    """检查所有已注册工具的健康状态"""
+    from app.core.comic_chat_agent.tool_capability import TOOL_CAPABILITIES
+    health: list[dict] = []
+    for name, cap in TOOL_CAPABILITIES.items():
+        health.append({
+            "tool_name": name,
+            "risk_level": cap.risk_level,
+            "cost_level": cap.cost_level,
+            "needs_approval": cap.needs_approval,
+            "fallback_tools": list(cap.fallback_tools),
+            "status": "available",
+        })
+    return {"tools": health, "total": len(health)}
+
+
+@router.get("/tools/stats")
+async def get_tool_stats(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """获取工具调用统计"""
+    result = await db.execute(
+        select(
+            ToolInvocation.tool_name,
+            sa_func.count().label("total"),
+            sa_func.count().filter(ToolInvocation.status == "succeeded").label("succeeded"),
+            sa_func.count().filter(ToolInvocation.status == "failed").label("failed"),
+        )
+        .join(AgentTask, AgentTask.task_uid == ToolInvocation.task_uid)
+        .where(AgentTask.user_id == current_user.id)
+        .group_by(ToolInvocation.tool_name)
+    )
+    stats = []
+    for row in result.all():
+        total = row.total or 0
+        succeeded = row.succeeded or 0
+        stats.append({
+            "tool_name": row.tool_name,
+            "total_calls": total,
+            "succeeded": succeeded,
+            "failed": row.failed or 0,
+            "success_rate": round(succeeded / total, 2) if total > 0 else 0,
+        })
+    return {"stats": stats}
+
+
 @router.get("/conversations/{conversation_id}/tasks")
 async def list_conversation_agent_tasks(
     conversation_id: int,
