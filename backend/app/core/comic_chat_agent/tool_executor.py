@@ -21,6 +21,7 @@ from app.core.comic_agent.workflow_selector import (
     select_t2i, select_t2v, select_i2v, select_edit, select_upscale,
     load_workflow, inject_params,
 )
+from app.core.comic_chat_agent.sandbox import SandboxChecker
 
 
 UPLOADS_DIR = Path(settings.UPLOAD_DIR).resolve() / "agent_outputs"
@@ -793,9 +794,22 @@ TOOL_ALIASES: dict[str, str] = {
 }
 
 
+_sandbox = SandboxChecker()
+
+
 async def execute_tool(tool_name: str, params: dict) -> dict:
-    """统一入口：别名解析 + 分派执行 + 统一 file_urls"""
+    """统一入口：沙箱前置检查 + 别名解析 + 分派执行 + 统一 file_urls"""
     resolved = TOOL_ALIASES.get(tool_name, tool_name)
+    # ── P7 沙箱前置检查 ──
+    decision = _sandbox.check_tool(resolved, params)
+    if not decision.allowed:
+        logger.warning(f"[Sandbox] BLOCKED tool={resolved} check={decision.check_type} reason={decision.reason}")
+        return {
+            "status": "blocked",
+            "error": decision.reason,
+            "error_code": f"SANDBOX_{decision.check_type.upper()}_BLOCKED",
+            "risk_level": decision.risk_level.name,
+        }
     executor = TOOL_EXECUTORS.get(resolved)
     if not executor:
         return {"status": "error", "error": f"未知工具: {tool_name}"}

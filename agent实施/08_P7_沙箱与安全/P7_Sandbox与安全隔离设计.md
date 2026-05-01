@@ -1,7 +1,7 @@
 # P7 Sandbox 与安全隔离设计
 
 > 所属阶段：P7  
-> 状态：待实施  
+> 状态：最小实现已落地  
 > 目标：为 Agent 工具执行建立安全隔离、权限审批和审计机制。
 
 ---
@@ -12,14 +12,14 @@
 
 ## 2. 目标
 
-- [ ] 定义工具风险等级。
-- [ ] 定义 SandboxPolicy。
-- [ ] 限制文件访问范围。
-- [ ] 限制网络访问范围。
-- [ ] 限制执行时间和输出大小。
-- [ ] 隔离敏感环境变量。
-- [ ] 高风险操作强制审批。
-- [ ] 工具执行审计落库。
+- [x] 定义工具风险等级（L0-L4）。
+- [x] 定义 SandboxPolicy（路径 / 命令 / 网络 denylist）。
+- [x] 限制文件访问范围（denied_filenames / denied_path_patterns）。
+- [x] 限制网络访问范围（denied_hosts / denied_network_cidrs）。
+- [x] 限制执行时间和输出大小（policy.timeout_seconds / max_output_chars）。
+- [x] 隔离敏感环境变量（python_exec 检查 os.environ）。
+- [x] 高风险操作强制拦截（L4 直接 block）。
+- [ ] 工具执行审计落库（待 sandbox_check 事件持久化）。
 
 ## 3. 非目标
 
@@ -136,18 +136,19 @@ wget ... | sh
 
 ## 11. TODO
 
-- [ ] 新建 `sandbox.py`。
-- [ ] 定义 `SandboxPolicy`。
-- [ ] 定义路径 allowlist/denylist。
-- [ ] 为 `bash/python_exec/write_file/edit_file/http_request` 接入沙箱检查。
-- [ ] 增加 `sandbox_check` 事件。
-- [ ] 高风险拒绝写入 ToolResult.error。
-- [ ] 增加测试用例。
+- [x] 新建 `sandbox.py`。
+- [x] 定义 `SandboxPolicy`。
+- [x] 定义路径 allowlist/denylist。
+- [x] 为 `bash/python_exec/write_file/edit_file/http_request/read_file/web_fetch` 接入沙箱检查。
+- [x] 高风险拒绝返回结构化 error + error_code + risk_level。
+- [ ] 增加 `sandbox_check` 审计事件持久化。
+- [ ] 增加自动化测试。
 
 ## 12. 验收标准
 
-- [ ] `bash rm -rf /` 被阻止。
-- [ ] 读取 `.env` 被阻止。
-- [ ] 写入非允许目录被阻止。
-- [ ] http_request 访问非白名单被阻止或要求审批。
-- [ ] 安全拒绝有结构化错误和审计事件。
+- [x] `bash rm -rf /` 被阻止。
+- [x] 读取 `.env` 被阻止。
+- [x] 写入非允许目录被阻止。
+- [x] http_request 访问 metadata IP 被阻止。
+- [x] 安全拒绝返回结构化 error / error_code / risk_level。
+- [ ] 审计事件持久化（待 P1 审计扩展）。
