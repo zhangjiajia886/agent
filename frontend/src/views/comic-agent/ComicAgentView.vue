@@ -707,8 +707,16 @@ import {
   uploadAgentImage,
   type AgentMessage, type AgentEvent,
   type ModelConfigItem, type ToolRegistryItem, type WorkflowTemplateItem,
-  type AgentPromptItem, type UploadResult,
+  type AgentPromptItem,
 } from '@/api/comic-agent'
+import type { TaskStep, AttachedImage } from './types'
+import {
+  useTask,
+  toolDisplayName, toolHint,
+  taskStatusLabel, taskStatusType,
+  stepStatusLabel, stepStatusType,
+  mapServerTaskStatus,
+} from './composables'
 
 // ──────────── 状态 ────────────
 const messages = ref<AgentMessage[]>([])
@@ -718,53 +726,19 @@ const streamingText = ref('')
 const messagesRef = ref<HTMLElement>()
 let msgIdCounter = 0
 
-type TaskStatus = 'idle' | 'running' | 'awaiting_approval' | 'completed' | 'failed' | 'canceled'
-type StepStatus = 'pending' | 'running' | 'awaiting_approval' | 'completed' | 'failed' | 'canceled'
-type ArtifactType = 'image' | 'video' | 'audio' | 'file'
-
-interface TaskStep {
-  id: string
-  tool?: string
-  toolCallId?: string
-  title: string
-  description: string
-  status: StepStatus
-  startedAt?: string
-  finishedAt?: string
-}
-
-interface TaskArtifact {
-  id: string
-  type: ArtifactType
-  title: string
-  url: string
-  fromStep: string
-}
-
-interface TaskLog {
-  id: string
-  stepId?: string
-  title: string
-  content: string
-  timestamp: string
-}
-
-interface AgentTaskViewModel {
-  id: string
-  taskUid?: string
-  title: string
-  userRequest: string
-  intent: string
-  analysis: string
-  currentStage: string
-  status: TaskStatus
-  steps: TaskStep[]
-  artifacts: TaskArtifact[]
-  logs: TaskLog[]
-  finalReport?: Record<string, any>
-}
-
-const activeTask = ref<AgentTaskViewModel | null>(null)
+// ──────────── 任务管理 (composable) ────────────
+const {
+  activeTask,
+  createTask,
+  addTaskLog,
+  stepLogs,
+  compactLogContent,
+  findTaskStepByTool,
+  ensureToolStep,
+  addArtifact,
+  upsertServerStep,
+  upsertServerArtifact,
+} = useTask()
 
 // ──────────── 抽屉状态 ────────────
 const drawerVisible = ref(false)
@@ -780,12 +754,6 @@ const showThinking = ref(false)
 const autoExec = ref(false)  // 自动执行模式（创作类工具无需审批）
 
 // ──────────── 图片附件状态 ────────────
-interface AttachedImage {
-  file: File
-  previewUrl: string
-  uploading: boolean
-  uploaded?: UploadResult
-}
 const attachedImages = ref<AttachedImage[]>([])
 const fileInputRef = ref<HTMLInputElement>()
 const MAX_IMAGES = 4
@@ -940,289 +908,6 @@ const finalReportText = computed(() => {
   }
   return `**任务状态**：${status}\n\n**需求理解**：${activeTask.value.analysis}\n\n**执行结果**：完成 ${completed}/${total} 个规划节点，产出 ${activeTask.value.artifacts.length} 项结果。\n\n**总结**：本轮任务已经结束，工具调用已停止，结果与执行记录已归档在上方对应模块。`
 })
-
-// ──────────── 工具显示名映射 ────────────
-const TOOL_NAMES: Record<string, string> = {
-  generate_image: '图像生成',
-  generate_image_with_face: '人像一致性生成',
-  edit_image: '图像编辑',
-  image_to_video: '图像动态化',
-  text_to_speech: '语音合成',
-  upscale_image: '图像超分',
-  merge_media: '媒体合成',
-  add_subtitle: '字幕叠加',
-  bash: '系统命令',
-  read_file: '读取文件',
-  write_file: '写入文件',
-  edit_file: '编辑文件',
-  python_exec: 'Python 执行',
-  web_search: '网络检索',
-  web_fetch: '网页抓取',
-  grep_search: '内容检索',
-  find_files: '文件定位',
-  list_dir: '目录查看',
-  http_request: 'HTTP 请求',
-}
-
-const TOOL_HINTS: Record<string, string> = {
-  generate_image: '正在调用图像生成服务，通常需要 15-60 秒。',
-  image_to_video: '正在生成视频内容，通常需要 30-120 秒。',
-  bash: '正在执行系统命令。',
-  python_exec: '正在执行 Python 代码。',
-  web_search: '正在检索网络信息。',
-  web_fetch: '正在获取网页内容。',
-}
-
-function toolDisplayName(name?: string): string {
-  return name ? (TOOL_NAMES[name] || `工具：${name}`) : '未识别工具'
-}
-
-function toolHint(name?: string): string {
-  return name ? (TOOL_HINTS[name] || '') : ''
-}
-
-function taskStatusLabel(status: TaskStatus): string {
-  const map: Record<TaskStatus, string> = {
-    idle: '待启动',
-    running: '执行中',
-    awaiting_approval: '等待确认',
-    completed: '已完成',
-    failed: '执行失败',
-    canceled: '已取消',
-  }
-  return map[status]
-}
-
-function taskStatusType(status: TaskStatus): string {
-  const map: Record<TaskStatus, string> = {
-    idle: 'info',
-    running: 'primary',
-    awaiting_approval: 'warning',
-    completed: 'success',
-    failed: 'danger',
-    canceled: 'info',
-  }
-  return map[status]
-}
-
-function stepStatusLabel(status: StepStatus): string {
-  const map: Record<StepStatus, string> = {
-    pending: '待执行',
-    running: '处理中',
-    awaiting_approval: '待确认',
-    completed: '已完成',
-    failed: '失败',
-    canceled: '已取消',
-  }
-  return map[status]
-}
-
-function stepStatusType(status: StepStatus): string {
-  const map: Record<StepStatus, string> = {
-    pending: 'info',
-    running: 'primary',
-    awaiting_approval: 'warning',
-    completed: 'success',
-    failed: 'danger',
-    canceled: 'info',
-  }
-  return map[status]
-}
-
-function inferIntent(text: string): string {
-  if (/视频|动态|图生视频|旁白|配音|音频/.test(text)) return '多步骤创作任务'
-  if (/编辑|修改|改成|变成|弄成|超分|高清/.test(text)) return '图像编辑任务'
-  if (/漫剧|漫画|分镜|[2-6]\s*格/.test(text)) return '漫剧生成任务'
-  if (/生成|画|图片|图像/.test(text)) return '图像生成任务'
-  return '综合创作任务'
-}
-
-function buildInitialPlan(text: string): TaskStep[] {
-  const steps: TaskStep[] = [{
-    id: `analysis-${Date.now()}`,
-    title: '需求分析与执行策略确认',
-    description: '识别任务目标、创作约束、输入素材与后续工具调用路径。',
-    status: 'completed',
-    startedAt: new Date().toISOString(),
-    finishedAt: new Date().toISOString(),
-  }]
-
-  if (/生成|画|图片|图像|漫剧|漫画/.test(text)) {
-    steps.push({
-      id: `plan-generate-${Date.now()}`,
-      tool: 'generate_image',
-      title: '生成首版视觉结果',
-      description: '根据需求生成图片或分镜视觉产物，并作为后续步骤输入。',
-      status: 'pending',
-    })
-  }
-  if (/编辑|修改|改成|变成|弄成|幸福|开心|高清|超分/.test(text)) {
-    steps.push({
-      id: `plan-edit-${Date.now()}`,
-      tool: /超分|高清/.test(text) ? 'upscale_image' : 'edit_image',
-      title: /超分|高清/.test(text) ? '增强图像清晰度' : '执行图像编辑',
-      description: '根据用户要求调整图片内容、情绪、风格或画面质量。',
-      status: 'pending',
-    })
-  }
-  if (/视频|动态|动起来|图生视频/.test(text)) {
-    steps.push({
-      id: `plan-video-${Date.now()}`,
-      tool: 'image_to_video',
-      title: '制作动态视频',
-      description: '将已生成或已上传图片转化为动态视频。',
-      status: 'pending',
-    })
-  }
-  if (/旁白|配音|语音|音频/.test(text)) {
-    steps.push({
-      id: `plan-audio-${Date.now()}`,
-      tool: 'text_to_speech',
-      title: '生成旁白音频',
-      description: '根据指定文本合成旁白语音。',
-      status: 'pending',
-    })
-  }
-
-  if (steps.length === 1) {
-    steps.push({
-      id: `plan-execute-${Date.now()}`,
-      title: '执行核心任务',
-      description: '根据 Agent 判断选择合适工具完成本轮请求。',
-      status: 'pending',
-    })
-  }
-  return steps
-}
-
-function createTask(text: string) {
-  const intent = inferIntent(text)
-  activeTask.value = {
-    id: `task-${Date.now()}`,
-    title: '创作任务工作台',
-    userRequest: text,
-    intent,
-    analysis: text.length > 72 ? `${text.slice(0, 72)}...` : text,
-    currentStage: '已完成需求分析，正在等待执行计划落地。',
-    status: 'running',
-    steps: buildInitialPlan(text),
-    artifacts: [],
-    logs: [],
-  }
-}
-
-function addTaskLog(title: string, content?: string, stepId?: string) {
-  if (!activeTask.value || !content) return
-  activeTask.value.logs.push({
-    id: `log-${Date.now()}-${activeTask.value.logs.length}`,
-    stepId,
-    title,
-    content,
-    timestamp: new Date().toISOString(),
-  })
-}
-
-function stepLogs(step: TaskStep): TaskLog[] {
-  if (!activeTask.value) return []
-  return activeTask.value.logs.filter(log => log.stepId === step.id)
-}
-
-function compactLogContent(content: string): string {
-  const text = content.replace(/\s+/g, ' ').trim()
-  return text.length > 220 ? `${text.slice(0, 220)}...` : text
-}
-
-function findTaskStepByTool(tool?: string, toolCallId?: string): TaskStep | undefined {
-  if (!activeTask.value) return undefined
-  if (toolCallId) {
-    const byCall = activeTask.value.steps.find(s => s.toolCallId === toolCallId)
-    if (byCall) return byCall
-  }
-  if (tool) {
-    const running = activeTask.value.steps.find(s => s.tool === tool && ['running', 'awaiting_approval', 'pending'].includes(s.status))
-    if (running) return running
-  }
-  return activeTask.value.steps.find(s => s.status === 'pending')
-}
-
-function ensureToolStep(tool?: string, description?: string, toolCallId?: string): TaskStep | undefined {
-  if (!activeTask.value) return undefined
-  let step = findTaskStepByTool(tool, toolCallId)
-  if (!step) {
-    step = {
-      id: `step-${Date.now()}-${activeTask.value.steps.length}`,
-      tool,
-      toolCallId,
-      title: toolDisplayName(tool),
-      description: description || toolHint(tool) || '执行本阶段所需操作。',
-      status: 'pending',
-    }
-    activeTask.value.steps.push(step)
-  }
-  if (tool) step.tool = tool
-  if (toolCallId) step.toolCallId = toolCallId
-  if (description) step.description = description
-  return step
-}
-
-function addArtifact(type: ArtifactType, url: string, fromStep: string) {
-  if (!activeTask.value) return
-  if (activeTask.value.artifacts.some(item => item.url === url)) return
-  activeTask.value.artifacts.push({
-    id: `artifact-${Date.now()}-${activeTask.value.artifacts.length}`,
-    type,
-    url,
-    fromStep,
-    title: type === 'image' ? '图像结果' : type === 'video' ? '视频结果' : type === 'audio' ? '音频结果' : '文件结果',
-  })
-}
-
-function mapServerStepStatus(status?: string): StepStatus {
-  if (status === 'succeeded') return 'completed'
-  if (status === 'awaiting_approval') return 'awaiting_approval'
-  if (status === 'failed' || status === 'blocked') return 'failed'
-  if (status === 'canceled' || status === 'skipped') return 'canceled'
-  if (status === 'running') return 'running'
-  return 'pending'
-}
-
-function mapServerTaskStatus(status?: string): TaskStatus {
-  if (status === 'completed') return 'completed'
-  if (status === 'failed' || status === 'blocked' || status === 'incomplete') return 'failed'
-  if (status === 'canceled') return 'canceled'
-  if (status === 'awaiting_approval') return 'awaiting_approval'
-  return 'running'
-}
-
-function upsertServerStep(raw: Record<string, any>) {
-  if (!activeTask.value) return
-  const id = raw.step_uid || raw.id
-  if (!id) return
-  let step = activeTask.value.steps.find(s => s.id === id)
-  if (!step) {
-    step = {
-      id,
-      tool: raw.tool_name || raw.tool,
-      title: raw.title || toolDisplayName(raw.tool_name || raw.tool),
-      description: raw.description || '后端任务图步骤。',
-      status: mapServerStepStatus(raw.status),
-    }
-    activeTask.value.steps.push(step)
-  }
-  step.tool = raw.tool_name || raw.tool || step.tool
-  step.title = raw.title || step.title
-  step.description = raw.description || step.description
-  step.status = mapServerStepStatus(raw.status)
-  if (raw.status === 'running') step.startedAt = step.startedAt || new Date().toISOString()
-  if (['succeeded', 'failed', 'blocked', 'canceled', 'skipped'].includes(raw.status)) step.finishedAt = step.finishedAt || new Date().toISOString()
-}
-
-function upsertServerArtifact(raw: Record<string, any>, stepId?: string) {
-  const type = (raw.type || raw.artifact_type || 'file') as ArtifactType
-  const url = raw.url
-  if (!url || !['image', 'video', 'audio', 'file'].includes(type)) return
-  addArtifact(type, url, stepId || raw.step_uid || 'server')
-}
 
 function approveTaskStep(step: TaskStep, action: 'approve' | 'reject') {
   step.status = action === 'approve' ? 'running' : 'canceled'
