@@ -1,0 +1,178 @@
+{
+  "46": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    }
+  },
+  "53": {
+    "class_type": "DualCFGGuider",
+    "inputs": {
+      "model": [
+        "61",
+        0
+      ],
+      "cond1": [
+        "52",
+        0
+      ],
+      "cond2": [
+        "52",
+        1
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "cfg_conds": 3.5,
+      "cfg_cond2_negative": 1.0,
+      "style": "regular"
+    }
+  },
+  "49": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "61",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1
+    }
+  },
+  "47": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 165880921568421
+    }
+  },
+  "52": {
+    "class_type": "InstructPixToPixConditioning",
+    "inputs": {
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "43",
+        0
+      ],
+      "pixels": [
+        "45",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "00186-3579254636.png"
+    }
+  },
+  "45": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": {
+      "image": [
+        "13",
+        0
+      ],
+      "upscale_method": "bilinear",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "66": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "42",
+        0
+      ],
+      "text": "low quality, blurry, distorted"
+    }
+  },
+  "43": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "54",
+        0
+      ],
+      "vae": [
+        "43",
+        0
+      ]
+    }
+  },
+  "54": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "47",
+        0
+      ],
+      "guider": [
+        "53",
+        0
+      ],
+      "sampler": [
+        "46",
+        0
+      ],
+      "sigmas": [
+        "49",
+        0
+      ],
+      "latent_image": [
+        "52",
+        2
+      ]
+    }
+  },
+  "42": {
+    "class_type": "QuadrupleCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_g_hidream.safetensors",
+      "clip_name2": "clip_l_hidream.safetensors",
+      "clip_name3": "t5xxl_fp8_e4m3fn_scaled.safetensors",
+      "clip_name4": "llama_3.1_8b_instruct_fp8_scaled.safetensors"
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "42",
+        0
+      ],
+      "text": "把背景换成海边"
+    }
+  },
+  "61": {
+    "class_type": "UnetLoaderGGUF",
+    "inputs": {
+      "unet_name": "hidream_e1_full_bf16-Q4_K_M.gguf"
+    }
+  }
+}

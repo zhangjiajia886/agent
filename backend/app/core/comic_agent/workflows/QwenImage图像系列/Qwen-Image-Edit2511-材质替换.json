@@ -1,0 +1,231 @@
+{
+  "67": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "74",
+        0
+      ],
+      "shift": 3.1
+    }
+  },
+  "10": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    }
+  },
+  "71": {
+    "class_type": "FluxKontextMultiReferenceLatentMethod",
+    "inputs": {
+      "conditioning": [
+        "69",
+        0
+      ],
+      "reference_latents_method": "index_timestep_zero"
+    }
+  },
+  "70": {
+    "class_type": "FluxKontextMultiReferenceLatentMethod",
+    "inputs": {
+      "conditioning": [
+        "68",
+        0
+      ],
+      "reference_latents_method": "index_timestep_zero"
+    }
+  },
+  "64": {
+    "class_type": "CFGNorm",
+    "inputs": {
+      "model": [
+        "67",
+        0
+      ],
+      "strength": 1
+    }
+  },
+  "69": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "61",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ],
+      "image1": [
+        "79",
+        0
+      ],
+      "image2": [
+        "90",
+        0
+      ],
+      "image3": [
+        "87",
+        0
+      ],
+      "prompt": ""
+    }
+  },
+  "75": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "79",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    }
+  },
+  "68": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "61",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ],
+      "image1": [
+        "79",
+        0
+      ],
+      "image2": [
+        "90",
+        0
+      ],
+      "image3": [
+        "87",
+        0
+      ],
+      "prompt": "Change the furniture leather difference in image 1 to the fur material in image 2."
+    }
+  },
+  "41": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "leather_sofa.png"
+    }
+  },
+  "87": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "wooden_chair.png"
+    }
+  },
+  "12": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_edit_2511_fp8mixed.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "61": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "74": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "12",
+        0
+      ],
+      "lora_name": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+      "strength_model": 1
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "65",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    }
+  },
+  "88": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "83": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "texture_fur.jpg"
+    }
+  },
+  "90": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": {
+      "image": [
+        "83",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "79": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": {
+      "image": [
+        "41",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "65": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "64",
+        0
+      ],
+      "positive": [
+        "70",
+        0
+      ],
+      "negative": [
+        "71",
+        0
+      ],
+      "latent_image": [
+        "75",
+        0
+      ],
+      "seed": 49050428127246,
+      "steps": 20,
+      "cfg": 4,
+      "sampler_name": "euler_cfg_pp",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  }
+}

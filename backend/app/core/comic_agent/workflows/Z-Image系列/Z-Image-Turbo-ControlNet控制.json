@@ -1,0 +1,192 @@
+{
+  "72": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "lumina2",
+      "device": "default"
+    }
+  },
+  "73": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "z_image_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "74": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "79": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "82",
+        0
+      ]
+    }
+  },
+  "77": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "80",
+        0
+      ],
+      "shift": 3
+    }
+  },
+  "62": {
+    "class_type": "ImageScaleToMaxDimension",
+    "inputs": {
+      "image": [
+        "58",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "largest_size": 1024
+    }
+  },
+  "80": {
+    "class_type": "QwenImageDiffsynthControlnet",
+    "inputs": {
+      "model": [
+        "73",
+        0
+      ],
+      "model_patch": [
+        "75",
+        0
+      ],
+      "vae": [
+        "74",
+        0
+      ],
+      "image": [
+        "86",
+        0
+      ],
+      "strength": 0.8
+    }
+  },
+  "81": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": [
+        "83",
+        0
+      ],
+      "height": [
+        "83",
+        1
+      ],
+      "batch_size": 1
+    }
+  },
+  "83": {
+    "class_type": "GetImageSize",
+    "inputs": {
+      "image": [
+        "86",
+        0
+      ]
+    }
+  },
+  "82": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "72",
+        0
+      ],
+      "text": "逼真的照片，一位亚裔模特透过松树枝偷看的特写，斑驳的阳光洒在她脸上，自然、氛围感十足，皮肤光滑，带有一点胶片颗粒感。"
+    }
+  },
+  "76": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "78",
+        0
+      ],
+      "vae": [
+        "74",
+        0
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "76",
+        0
+      ],
+      "filename_prefix": "z-image-turbo"
+    }
+  },
+  "86": {
+    "class_type": "CannyEdgePreprocessor",
+    "inputs": {
+      "image": [
+        "62",
+        0
+      ],
+      "low_threshold": 88,
+      "high_threshold": 118,
+      "resolution": 1536
+    }
+  },
+  "89": {
+    "class_type": "Preview Image-JPEG",
+    "inputs": {
+      "images": [
+        "86",
+        0
+      ],
+      "quality": 0.7
+    }
+  },
+  "58": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "00186-3579254636.png"
+    }
+  },
+  "75": {
+    "class_type": "ModelPatchLoader",
+    "inputs": {
+      "name": "Z-Image-Turbo-Fun-Controlnet-Union-2.1.safetensors"
+    }
+  },
+  "78": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "77",
+        0
+      ],
+      "positive": [
+        "82",
+        0
+      ],
+      "negative": [
+        "79",
+        0
+      ],
+      "latent_image": [
+        "81",
+        0
+      ],
+      "seed": 945668768011538,
+      "steps": 20,
+      "cfg": 11,
+      "sampler_name": "euler_cfg_pp",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  }
+}

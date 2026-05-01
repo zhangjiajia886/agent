@@ -1,0 +1,146 @@
+{
+  "10": {
+    "class_type": "ControlNetApplySD3",
+    "inputs": {
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "control_net": [
+        "11",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ],
+      "image": [
+        "12",
+        0
+      ],
+      "strength": 1,
+      "start_percent": 0,
+      "end_percent": 0.7000000000000002
+    }
+  },
+  "14": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "12",
+        0
+      ]
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "4",
+        1
+      ],
+      "text": "1girl, High quality"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 512,
+      "height": 768,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "10",
+        1
+      ],
+      "latent_image": [
+        "5",
+        0
+      ],
+      "seed": 357644838182519,
+      "steps": "randomize",
+      "cfg": 20,
+      "sampler_name": 6,
+      "scheduler": "simple",
+      "denoise": "karras"
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "4",
+        1
+      ],
+      "text": "embedding:EasyNegative, "
+    }
+  },
+  "11": {
+    "class_type": "ControlNetLoader",
+    "inputs": {
+      "control_net_name": "control_v11f1p_sd15_depth_fp16.safetensors"
+    }
+  },
+  "13": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "00186-3579254636.png"
+    }
+  },
+  "12": {
+    "class_type": "AIO_Preprocessor",
+    "inputs": {
+      "image": [
+        "13",
+        0
+      ],
+      "preprocessor": "DepthAnythingPreprocessor",
+      "resolution": 512
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "majicMIX_realistic_v7.safetensors"
+    }
+  }
+}

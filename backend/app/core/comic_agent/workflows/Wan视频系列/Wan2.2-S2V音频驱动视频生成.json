@@ -1,0 +1,819 @@
+{
+  "38": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    }
+  },
+  "80": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "95",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "38",
+        0
+      ],
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    }
+  },
+  "39": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    }
+  },
+  "57": {
+    "class_type": "AudioEncoderLoader",
+    "inputs": {
+      "audio_encoder_name": "wav2vec2_large_english_fp16.safetensors"
+    }
+  },
+  "93": {
+    "class_type": "WanSoundImageToVideo",
+    "inputs": {
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "audio_encoder_output": [
+        "56",
+        0
+      ],
+      "ref_image": [
+        "52",
+        0
+      ],
+      "length": [
+        "104",
+        0
+      ],
+      "width": 640,
+      "height": 640,
+      "batch_size": 77,
+      "control_video": 1
+    }
+  },
+  "54": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "107",
+        0
+      ],
+      "shift": 8
+    }
+  },
+  "95": {
+    "class_type": "LatentConcat",
+    "inputs": {
+      "samples1": [
+        "94",
+        0
+      ],
+      "samples2": [
+        "87",
+        0
+      ],
+      "dim": "t"
+    }
+  },
+  "94": {
+    "class_type": "LatentCut",
+    "inputs": {
+      "samples": [
+        "87",
+        0
+      ],
+      "dim": "t",
+      "index": 0,
+      "amount": 1
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "38",
+        0
+      ],
+      "text": "The man is playing the guitar. He looks down at his hands playing the guitar and sings affectionately and gently."
+    }
+  },
+  "85": {
+    "class_type": "866cdb67-cb97-4a54-8738-e9ece4f5f25f",
+    "inputs": {
+      "model": [
+        "54",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "video_latent": [
+        "79",
+        0
+      ],
+      "audio_encoder_output": [
+        "56",
+        0
+      ],
+      "ref_image": [
+        "52",
+        0
+      ],
+      "steps": [
+        "103",
+        0
+      ],
+      "cfg": [
+        "105",
+        0
+      ],
+      "length": [
+        "104",
+        0
+      ],
+      "control_video": 250,
+      "seed": 10,
+      "sampler_name": 6,
+      "scheduler": "simple"
+    }
+  },
+  "104": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 77
+    }
+  },
+  "100": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 3
+    }
+  },
+  "56": {
+    "class_type": "AudioEncoderEncode",
+    "inputs": {
+      "audio_encoder": [
+        "57",
+        0
+      ],
+      "audio": [
+        "58",
+        0
+      ]
+    }
+  },
+  "87": {
+    "class_type": "92cfa20b-adb6-4f00-8596-f14b534cf926",
+    "inputs": {
+      "model": [
+        "54",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "video_latent": [
+        "85",
+        0
+      ],
+      "audio_encoder_output": [
+        "56",
+        0
+      ],
+      "ref_image": [
+        "52",
+        0
+      ],
+      "steps": [
+        "103",
+        0
+      ],
+      "cfg": [
+        "105",
+        0
+      ],
+      "length": [
+        "104",
+        0
+      ],
+      "control_video": 1,
+      "seed": 10,
+      "sampler_name": 6,
+      "scheduler": "simple"
+    }
+  },
+  "103": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 4
+    }
+  },
+  "105": {
+    "class_type": "PrimitiveFloat",
+    "inputs": {
+      "value": 1
+    }
+  },
+  "147": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    }
+  },
+  "148": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "156",
+        0
+      ],
+      "vae": [
+        "150",
+        0
+      ]
+    }
+  },
+  "149": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "147",
+        0
+      ],
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    }
+  },
+  "150": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    }
+  },
+  "151": {
+    "class_type": "AudioEncoderLoader",
+    "inputs": {
+      "audio_encoder_name": "wav2vec2_large_english_fp16.safetensors"
+    }
+  },
+  "152": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "154",
+        0
+      ],
+      "positive": [
+        "153",
+        0
+      ],
+      "negative": [
+        "153",
+        1
+      ],
+      "latent_image": [
+        "153",
+        2
+      ],
+      "steps": [
+        "177",
+        0
+      ],
+      "cfg": [
+        "178",
+        0
+      ],
+      "seed": 20,
+      "sampler_name": "euler",
+      "scheduler": 10,
+      "denoise": 6
+    }
+  },
+  "153": {
+    "class_type": "WanSoundImageToVideo",
+    "inputs": {
+      "positive": [
+        "159",
+        0
+      ],
+      "negative": [
+        "149",
+        0
+      ],
+      "vae": [
+        "150",
+        0
+      ],
+      "audio_encoder_output": [
+        "173",
+        0
+      ],
+      "ref_image": [
+        "160",
+        0
+      ],
+      "length": [
+        "166",
+        0
+      ],
+      "width": 640,
+      "height": 640,
+      "batch_size": 77,
+      "control_video": 1
+    }
+  },
+  "154": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "161",
+        0
+      ],
+      "shift": 8
+    }
+  },
+  "155": {
+    "class_type": "ImageFromBatch",
+    "inputs": {
+      "image": [
+        "148",
+        0
+      ],
+      "batch_index": [
+        "169",
+        0
+      ],
+      "length": 0
+    }
+  },
+  "156": {
+    "class_type": "LatentConcat",
+    "inputs": {
+      "samples1": [
+        "157",
+        0
+      ],
+      "samples2": [
+        "174",
+        0
+      ],
+      "dim": "t"
+    }
+  },
+  "157": {
+    "class_type": "LatentCut",
+    "inputs": {
+      "samples": [
+        "174",
+        0
+      ],
+      "dim": "t",
+      "index": 0,
+      "amount": 1
+    }
+  },
+  "159": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "147",
+        0
+      ],
+      "text": "The man is playing the guitar. He looks down at his hands playing the guitar and sings affectionately and gently."
+    }
+  },
+  "165": {
+    "class_type": "d7670b5a-34e9-40f6-ac84-ec52996e52f3",
+    "inputs": {
+      "model": [
+        "154",
+        0
+      ],
+      "positive": [
+        "159",
+        0
+      ],
+      "negative": [
+        "149",
+        0
+      ],
+      "vae": [
+        "150",
+        0
+      ],
+      "video_latent": [
+        "172",
+        0
+      ],
+      "audio_encoder_output": [
+        "173",
+        0
+      ],
+      "ref_image": [
+        "160",
+        0
+      ],
+      "steps": [
+        "177",
+        0
+      ],
+      "cfg": [
+        "178",
+        0
+      ],
+      "length": [
+        "166",
+        0
+      ],
+      "control_video": 250,
+      "seed": 10,
+      "sampler_name": 6,
+      "scheduler": "simple"
+    }
+  },
+  "166": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 77
+    }
+  },
+  "167": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "155",
+        0
+      ],
+      "audio": [
+        "162",
+        0
+      ],
+      "fps": 16
+    }
+  },
+  "169": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 3
+    }
+  },
+  "172": {
+    "class_type": "bdee126d-2d92-4d01-9e74-9118a9d609c5",
+    "inputs": {
+      "model": [
+        "154",
+        0
+      ],
+      "positive": [
+        "159",
+        0
+      ],
+      "negative": [
+        "149",
+        0
+      ],
+      "vae": [
+        "150",
+        0
+      ],
+      "video_latent": [
+        "152",
+        0
+      ],
+      "audio_encoder_output": [
+        "173",
+        0
+      ],
+      "ref_image": [
+        "160",
+        0
+      ],
+      "steps": [
+        "177",
+        0
+      ],
+      "cfg": [
+        "178",
+        0
+      ],
+      "length": [
+        "166",
+        0
+      ],
+      "control_video": 1,
+      "seed": 10,
+      "sampler_name": 6,
+      "scheduler": "simple"
+    }
+  },
+  "173": {
+    "class_type": "AudioEncoderEncode",
+    "inputs": {
+      "audio_encoder": [
+        "151",
+        0
+      ],
+      "audio": [
+        "162",
+        0
+      ]
+    }
+  },
+  "168": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "167",
+        0
+      ],
+      "filename_prefix": "video/ComfyUI",
+      "format": "auto",
+      "codec": "auto"
+    }
+  },
+  "177": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 20
+    }
+  },
+  "178": {
+    "class_type": "PrimitiveFloat",
+    "inputs": {
+      "value": 6
+    }
+  },
+  "174": {
+    "class_type": "51b3a856-6e10-44f8-94d7-2a92a39c9707",
+    "inputs": {
+      "model": [
+        "154",
+        0
+      ],
+      "positive": [
+        "159",
+        0
+      ],
+      "negative": [
+        "149",
+        0
+      ],
+      "vae": [
+        "150",
+        0
+      ],
+      "video_latent": [
+        "165",
+        0
+      ],
+      "audio_encoder_output": [
+        "173",
+        0
+      ],
+      "ref_image": [
+        "160",
+        0
+      ],
+      "steps": [
+        "177",
+        0
+      ],
+      "cfg": [
+        "178",
+        0
+      ],
+      "length": [
+        "166",
+        0
+      ],
+      "control_video": 1,
+      "seed": 10,
+      "sampler_name": 6,
+      "scheduler": "simple"
+    }
+  },
+  "37": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "wan2.2_s2v_14B_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "161": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "wan2.2_s2v_14B_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "54",
+        0
+      ],
+      "positive": [
+        "93",
+        0
+      ],
+      "negative": [
+        "93",
+        1
+      ],
+      "latent_image": [
+        "93",
+        2
+      ],
+      "steps": [
+        "103",
+        0
+      ],
+      "cfg": [
+        "105",
+        0
+      ],
+      "seed": 604954454457268,
+      "sampler_name": "euler",
+      "scheduler": 10,
+      "denoise": 6
+    }
+  },
+  "162": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "video_wan2_2_14B_s2v_input_audio.MP3"
+    }
+  },
+  "160": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "video_wan2_2_14B_s2v_reference_image.jpg"
+    }
+  },
+  "107": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "37",
+        0
+      ],
+      "lora_name": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+      "strength_model": 1
+    }
+  },
+  "58": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "video_wan_wan2.2_s2v_input_audio.MP3"
+    }
+  },
+  "52": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "wan22-s2v-input.jpg"
+    }
+  },
+  "79": {
+    "class_type": "ad3f1d6b-f6de-4f22-abcf-caeed4bf8ce4",
+    "inputs": {
+      "model": [
+        "54",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "video_latent": [
+        "3",
+        0
+      ],
+      "audio_encoder_output": [
+        "56",
+        0
+      ],
+      "ref_image": [
+        "52",
+        0
+      ],
+      "steps": [
+        "103",
+        0
+      ],
+      "cfg": [
+        "105",
+        0
+      ],
+      "length": [
+        "104",
+        0
+      ],
+      "control_video": 1,
+      "seed": 10,
+      "sampler_name": 6,
+      "scheduler": "simple"
+    }
+  },
+  "96": {
+    "class_type": "ImageFromBatch",
+    "inputs": {
+      "image": [
+        "80",
+        0
+      ],
+      "batch_index": [
+        "100",
+        0
+      ],
+      "length": 0
+    }
+  },
+  "183": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": [
+        "96",
+        0
+      ],
+      "audio": [
+        "58",
+        0
+      ],
+      "frame_rate": 16,
+      "loop_count": 0,
+      "filename_prefix": "Wan2.2-S2V音频驱动",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "videopreview": {
+        "hidden": false,
+        "paused": false,
+        "params": {
+          "filename": "Wan2.2-S2V音频驱动_00001-audio.mp4",
+          "subfolder": "",
+          "type": "output",
+          "format": "video/h264-mp4",
+          "frame_rate": 16,
+          "workflow": "Wan2.2-S2V音频驱动_00001.png",
+          "fullpath": "/root/autodl-tmp/ComfyUI/output/Wan2.2-S2V音频驱动_00001-audio.mp4"
+        }
+      }
+    }
+  }
+}

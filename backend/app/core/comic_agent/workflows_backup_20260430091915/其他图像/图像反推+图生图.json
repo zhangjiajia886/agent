@@ -1,0 +1,158 @@
+{
+  "23": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "21",
+        1
+      ],
+      "text": "embedding:EasyNegative, "
+    }
+  },
+  "24": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "21",
+        1
+      ],
+      "text": [
+        "32",
+        2
+      ]
+    }
+  },
+  "21": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "anything-v5-PrtRE.safetensors"
+    }
+  },
+  "26": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "27",
+        0
+      ],
+      "vae": [
+        "21",
+        2
+      ]
+    }
+  },
+  "27": {
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "inputs": {
+      "image": [
+        "17",
+        0
+      ],
+      "mask": "original",
+      "aspect_ratio": 1,
+      "proportional_width": 1,
+      "proportional_height": "letterbox",
+      "fit": "lanczos",
+      "method": "lanczos",
+      "round_to_multiple": "longest",
+      "scale_to_side": 768,
+      "scale_to_length": "#000000"
+    }
+  },
+  "19": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "21",
+        0
+      ],
+      "positive": [
+        "24",
+        0
+      ],
+      "negative": [
+        "23",
+        0
+      ],
+      "latent_image": [
+        "26",
+        0
+      ],
+      "seed": 249421546267572,
+      "steps": "randomize",
+      "cfg": 20,
+      "sampler_name": 8,
+      "scheduler": "simple",
+      "denoise": "normal"
+    }
+  },
+  "20": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "19",
+        0
+      ],
+      "vae": [
+        "21",
+        2
+      ]
+    }
+  },
+  "22": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "20",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "28": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "32",
+        2
+      ]
+    }
+  },
+  "17": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "00186-3579254636.png"
+    }
+  },
+  "32": {
+    "class_type": "Florence2Run",
+    "inputs": {
+      "image": [
+        "17",
+        0
+      ],
+      "florence2_model": [
+        "30",
+        0
+      ],
+      "text_input": "",
+      "task": "more_detailed_caption",
+      "fill_mask": true,
+      "keep_model_loaded": false,
+      "max_new_tokens": 1024,
+      "num_beams": 3,
+      "do_sample": true,
+      "output_mask_select": "",
+      "seed": 226698926462552
+    }
+  },
+  "30": {
+    "class_type": "DownloadAndLoadFlorence2Model",
+    "inputs": {
+      "model": "microsoft/Florence-2-base",
+      "precision": "fp16",
+      "attention": "sdpa",
+      "lora": false
+    }
+  }
+}

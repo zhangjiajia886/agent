@@ -1,0 +1,630 @@
+{
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    }
+  },
+  "158": {
+    "class_type": "PixelPerfectResolution",
+    "inputs": {
+      "original_image": [
+        "23",
+        0
+      ],
+      "image_gen_width": [
+        "159",
+        0
+      ],
+      "image_gen_height": [
+        "160",
+        0
+      ],
+      "resize_mode": 512
+    }
+  },
+  "124": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "275",
+        0
+      ]
+    }
+  },
+  "127": {
+    "class_type": "MaskPreview",
+    "inputs": {
+      "mask": [
+        "276",
+        0
+      ]
+    }
+  },
+  "60": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "99",
+        0
+      ],
+      "shift": 8
+    }
+  },
+  "21": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "The character is dancing in the room"
+    }
+  },
+  "1": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    }
+  },
+  "9": {
+    "class_type": "CLIPVisionEncode",
+    "inputs": {
+      "clip_vision": [
+        "4",
+        0
+      ],
+      "image": [
+        "10",
+        0
+      ],
+      "crop": "none"
+    }
+  },
+  "107": {
+    "class_type": "Sam2Segmentation",
+    "inputs": {
+      "sam2_model": [
+        "108",
+        0
+      ],
+      "image": [
+        "212",
+        0
+      ],
+      "coordinates_positive": [
+        "229",
+        0
+      ],
+      "keep_model_loaded": true,
+      "coordinates_negative": false
+    }
+  },
+  "274": {
+    "class_type": "GrowMask",
+    "inputs": {
+      "mask": [
+        "107",
+        0
+      ],
+      "expand": 10,
+      "tapered_corners": true
+    }
+  },
+  "275": {
+    "class_type": "DrawMaskOnImage",
+    "inputs": {
+      "image": [
+        "212",
+        0
+      ],
+      "mask": [
+        "276",
+        0
+      ],
+      "color": "0, 0, 0",
+      "device": "cpu"
+    }
+  },
+  "276": {
+    "class_type": "BlockifyMask",
+    "inputs": {
+      "masks": [
+        "274",
+        0
+      ],
+      "block_size": 32,
+      "device": "cpu"
+    }
+  },
+  "18": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "20",
+        0
+      ],
+      "lora_name": "lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+      "strength_model": 1
+    }
+  },
+  "99": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "18",
+        0
+      ],
+      "lora_name": "WanAnimate_relight_lora_fp16.safetensors",
+      "strength_model": 1
+    }
+  },
+  "278": {
+    "class_type": "063b0ee8-c72b-442b-8029-dd3d5f4b6650",
+    "inputs": {
+      "model": [
+        "60",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "audio": [
+        "23",
+        1
+      ],
+      "image1": [
+        "242",
+        0
+      ],
+      "positive": [
+        "21",
+        0
+      ],
+      "negative": [
+        "1",
+        0
+      ],
+      "clip_vision_output": [
+        "9",
+        0
+      ],
+      "reference_image": [
+        "10",
+        0
+      ],
+      "face_video": [
+        "100",
+        0
+      ],
+      "pose_video": [
+        "101",
+        0
+      ],
+      "background_video": [
+        "275",
+        0
+      ],
+      "character_mask": [
+        "276",
+        0
+      ],
+      "width": [
+        "159",
+        0
+      ],
+      "video_frame_offset": [
+        "242",
+        1
+      ],
+      "seed": [
+        "281",
+        0
+      ],
+      "fps": [
+        "23",
+        2
+      ],
+      "steps": 1280,
+      "cfg": 0,
+      "sampler_name": 387378783691198,
+      "scheduler": 6
+    }
+  },
+  "160": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 640
+    }
+  },
+  "159": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 640
+    }
+  },
+  "280": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": -1044573148107975
+    }
+  },
+  "281": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": -601628903571795
+    }
+  },
+  "277": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "278",
+        2
+      ],
+      "filename_prefix": "video/ComfyUI",
+      "format": "auto",
+      "codec": "auto"
+    }
+  },
+  "279": {
+    "class_type": "PrimitiveInt",
+    "inputs": {
+      "value": 157000016584525
+    }
+  },
+  "10": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "wan22-animate-ref_image.png"
+    }
+  },
+  "108": {
+    "class_type": "DownloadAndLoadSAM2Model",
+    "inputs": {
+      "model": "sam2_hiera_base_plus.safetensors",
+      "segmentor": "video",
+      "device": "cuda",
+      "precision": "fp16"
+    }
+  },
+  "229": {
+    "class_type": "PointsEditor",
+    "inputs": {
+      "bg_image": [
+        "212",
+        0
+      ],
+      "points_store": "{\"positive\":[{\"x\":256,\"y\":256}],\"negative\":[{\"x\":0,\"y\":0}]}",
+      "coordinates": "[{\"x\":256,\"y\":256}]",
+      "neg_coordinates": "[{\"x\":0,\"y\":0}]",
+      "bbox_store": "[{}]",
+      "bboxes": "[{}]",
+      "bbox_format": "xyxy",
+      "width": 640,
+      "height": 640,
+      "normalize": false
+    }
+  },
+  "212": {
+    "class_type": "ImageScale",
+    "inputs": {
+      "image": [
+        "23",
+        0
+      ],
+      "width": [
+        "159",
+        0
+      ],
+      "height": [
+        "160",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "crop": 512
+    }
+  },
+  "20": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "Wan2_2-Animate-14B_fp8_scaled_e4m3fn_KJ_v2.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "4": {
+    "class_type": "CLIPVisionLoader",
+    "inputs": {
+      "clip_name": "clip_vision_h.safetensors"
+    }
+  },
+  "145": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "wan22-animate-original_video.mp4"
+    }
+  },
+  "100": {
+    "class_type": "DWPreprocessor",
+    "inputs": {
+      "image": [
+        "212",
+        0
+      ],
+      "resolution": [
+        "158",
+        0
+      ],
+      "detect_hand": "disable",
+      "detect_body": "disable",
+      "detect_face": "enable",
+      "bbox_detector": 512,
+      "pose_estimator": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "scale_stick_for_xinsr_cn": "disable"
+    }
+  },
+  "101": {
+    "class_type": "DWPreprocessor",
+    "inputs": {
+      "image": [
+        "212",
+        0
+      ],
+      "resolution": [
+        "158",
+        0
+      ],
+      "detect_hand": "enable",
+      "detect_body": "enable",
+      "detect_face": "disable",
+      "bbox_detector": 512,
+      "pose_estimator": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "scale_stick_for_xinsr_cn": "disable"
+    }
+  },
+  "232": {
+    "class_type": "90db3fa1-b7fd-4c97-90a4-3e9533589dce",
+    "inputs": {
+      "model": [
+        "60",
+        0
+      ],
+      "audio": [
+        "23",
+        1
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "positive": [
+        "21",
+        0
+      ],
+      "negative": [
+        "1",
+        0
+      ],
+      "clip_vision_output": [
+        "9",
+        0
+      ],
+      "reference_image": [
+        "10",
+        0
+      ],
+      "face_video": [
+        "100",
+        0
+      ],
+      "pose_video": [
+        "101",
+        0
+      ],
+      "background_video": [
+        "275",
+        0
+      ],
+      "character_mask": [
+        "276",
+        0
+      ],
+      "width": [
+        "159",
+        0
+      ],
+      "height": [
+        "160",
+        0
+      ],
+      "fps": [
+        "23",
+        2
+      ],
+      "seed": [
+        "279",
+        0
+      ],
+      "steps": 640,
+      "cfg": 640,
+      "sampler_name": 16,
+      "scheduler": 1106558644923357
+    }
+  },
+  "242": {
+    "class_type": "975ed319-ca2b-461e-b42a-8e2704ba902f",
+    "inputs": {
+      "model": [
+        "60",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "audio": [
+        "23",
+        1
+      ],
+      "image1": [
+        "232",
+        1
+      ],
+      "positive": [
+        "21",
+        0
+      ],
+      "negative": [
+        "1",
+        0
+      ],
+      "clip_vision_output": [
+        "9",
+        0
+      ],
+      "reference_image": [
+        "10",
+        0
+      ],
+      "face_video": [
+        "100",
+        0
+      ],
+      "pose_video": [
+        "101",
+        0
+      ],
+      "background_video": [
+        "275",
+        0
+      ],
+      "character_mask": [
+        "276",
+        0
+      ],
+      "width": [
+        "159",
+        0
+      ],
+      "video_frame_offset": [
+        "232",
+        2
+      ],
+      "seed": [
+        "280",
+        0
+      ],
+      "fps": [
+        "23",
+        2
+      ],
+      "steps": 1280,
+      "cfg": 0,
+      "sampler_name": 387378783691198,
+      "scheduler": 6
+    }
+  },
+  "289": {
+    "class_type": "PreviewAny",
+    "inputs": {
+      "source": [
+        "23",
+        2
+      ]
+    }
+  },
+  "23": {
+    "class_type": "GetVideoComponents",
+    "inputs": {
+      "video": [
+        "145",
+        0
+      ]
+    }
+  },
+  "291": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": [
+        "242",
+        0
+      ],
+      "audio": [
+        "23",
+        1
+      ],
+      "frame_rate": 16,
+      "loop_count": 0,
+      "filename_prefix": "Wan2.2Animate",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "videopreview": {
+        "hidden": false,
+        "paused": false,
+        "params": {
+          "filename": "WanVideoWrapper_I2V_00015.mp4",
+          "subfolder": "",
+          "type": "output",
+          "format": "video/h264-mp4",
+          "frame_rate": 16,
+          "workflow": "WanVideoWrapper_I2V_00015.png",
+          "fullpath": "/root/autodl-tmp/ComfyUI/output/WanVideoWrapper_I2V_00015.mp4"
+        }
+      }
+    }
+  },
+  "290": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": [
+        "232",
+        1
+      ],
+      "audio": [
+        "23",
+        1
+      ],
+      "frame_rate": 16,
+      "loop_count": 0,
+      "filename_prefix": "Wan2.2Animate",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "videopreview": {
+        "hidden": false,
+        "paused": false,
+        "params": {
+          "filename": "WanVideoWrapper_I2V_00014.mp4",
+          "subfolder": "",
+          "type": "output",
+          "format": "video/h264-mp4",
+          "frame_rate": 16,
+          "workflow": "WanVideoWrapper_I2V_00014.png",
+          "fullpath": "/root/autodl-tmp/ComfyUI/output/WanVideoWrapper_I2V_00014.mp4"
+        }
+      }
+    }
+  }
+}

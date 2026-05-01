@@ -1,0 +1,60 @@
+{
+  "1": {
+    "class_type": "MelBandRoFormerModelLoader",
+    "inputs": {
+      "model_name": "MelBand/MelBandRoformer_fp32.safetensors"
+    }
+  },
+  "6": {
+    "class_type": "SaveAudioMP3",
+    "inputs": {
+      "audio": [
+        "4",
+        1
+      ],
+      "filename_prefix": "伴奏",
+      "quality": "V0"
+    }
+  },
+  "3": {
+    "class_type": "TrimAudioDuration",
+    "inputs": {
+      "audio": [
+        "2",
+        0
+      ],
+      "start_index": 0,
+      "duration": 2048
+    }
+  },
+  "4": {
+    "class_type": "MelBandRoFormerSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "audio": [
+        "3",
+        0
+      ]
+    }
+  },
+  "5": {
+    "class_type": "SaveAudioMP3",
+    "inputs": {
+      "audio": [
+        "4",
+        0
+      ],
+      "filename_prefix": "人声",
+      "quality": "V0"
+    }
+  },
+  "2": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "dayuhaitang.mp3"
+    }
+  }
+}

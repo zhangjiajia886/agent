@@ -1,0 +1,137 @@
+{
+  "19": {
+    "class_type": "SeedVR2TorchCompileSettings",
+    "inputs": {
+      "backend": "inductor",
+      "mode": "default",
+      "fullgraph": false,
+      "dynamic": false,
+      "dynamo_cache_size_limit": 64,
+      "dynamo_recompile_limit": 128
+    }
+  },
+  "14": {
+    "class_type": "SeedVR2LoadDiTModel",
+    "inputs": {
+      "torch_compile_args": [
+        "19",
+        0
+      ],
+      "model": "seedvr2_ema_3b_fp8_e4m3fn.safetensors",
+      "device": "cuda:0",
+      "blocks_to_swap": 0,
+      "swap_io_components": false,
+      "offload_device": "none",
+      "cache_model": false,
+      "attention_mode": "flash_attn_2"
+    }
+  },
+  "13": {
+    "class_type": "SeedVR2LoadVAEModel",
+    "inputs": {
+      "torch_compile_args": [
+        "19",
+        0
+      ],
+      "model": "ema_vae_fp16.safetensors",
+      "device": "cuda:0",
+      "encode_tiled": false,
+      "encode_tile_size": 1024,
+      "encode_tile_overlap": 128,
+      "decode_tiled": false,
+      "decode_tile_size": 1024,
+      "decode_tile_overlap": 128,
+      "tile_debug": "false",
+      "offload_device": "none",
+      "cache_model": false
+    }
+  },
+  "15": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "10",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "10": {
+    "class_type": "SeedVR2VideoUpscaler",
+    "inputs": {
+      "image": [
+        "17",
+        0
+      ],
+      "dit": [
+        "14",
+        0
+      ],
+      "vae": [
+        "13",
+        0
+      ],
+      "seed": 3836220092,
+      "resolution": 2160,
+      "max_resolution": 2160,
+      "batch_size": 1,
+      "uniform_batch_size": 1,
+      "color_correction": "none",
+      "temporal_overlap": 2,
+      "prepend_frames": 0,
+      "input_noise_scale": 0,
+      "latent_noise_scale": 0,
+      "offload_device": "none",
+      "enable_debug": false
+    }
+  },
+  "16": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "PixPin_2025-12-23_17-32-43.jpg"
+    }
+  },
+  "17": {
+    "class_type": "JoinImageWithAlpha",
+    "inputs": {
+      "image": [
+        "16",
+        0
+      ],
+      "alpha": [
+        "16",
+        1
+      ]
+    }
+  },
+  "23": {
+    "class_type": "ImageCompare",
+    "inputs": {
+      "image_a": [
+        "10",
+        0
+      ],
+      "image_b": [
+        "16",
+        0
+      ],
+      "compare_view": {
+        "before": "/api/view?filename=comfy.compare.a_temp_efnye_00001_.png&subfolder=&type=temp&rand=0.19374800652040847",
+        "after": "/api/view?filename=comfy.compare.b_temp_efnye_00001_.png&subfolder=&type=temp&rand=0.19374800652040847"
+      }
+    }
+  },
+  "24": {
+    "class_type": "Image Comparer (rgthree)",
+    "inputs": {
+      "image_a": [
+        "10",
+        0
+      ],
+      "image_b": [
+        "17",
+        0
+      ]
+    }
+  }
+}

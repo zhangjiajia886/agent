@@ -1,0 +1,113 @@
+{
+  "4": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1328,
+      "height": 1328,
+      "batch_size": 1
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "7",
+        0
+      ],
+      "text": " "
+    }
+  },
+  "8": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "13",
+        0
+      ],
+      "shift": 3.1000000000000005
+    }
+  },
+  "7": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "1": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    }
+  },
+  "13": {
+    "class_type": "NunchakuQwenImageDiTLoader",
+    "inputs": {
+      "model_name": "svdq-int4_r128-qwen-image-lightningv1.0-4steps.safetensors",
+      "cpu_offload": "auto",
+      "num_blocks_on_gpu": 1,
+      "use_pin_memory": "disable"
+    }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "8",
+        0
+      ],
+      "positive": [
+        "9",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "4",
+        0
+      ],
+      "seed": 139694868837914,
+      "steps": 20,
+      "cfg": 4,
+      "sampler_name": "euler_cfg_pp",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  },
+  "2": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "2",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "9": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "7",
+        0
+      ],
+      "text": "在别墅的客厅里，一个穿着旗袍的女人，坐在沙发上，她有着白皙的皮肤，黑色长发。她手里拿着一本名为“时尚芭莎”的时尚杂志，客厅装修风格为中式风格，墙上，挂着一幅字，写着“室雅兰香”"
+    }
+  }
+}

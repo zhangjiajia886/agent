@@ -1,0 +1,283 @@
+{
+  "221": {
+    "inputs": {
+      "sigmas": "0.909375, 0.725, 0.421875, 0.0"
+    },
+    "class_type": "ManualSigmas",
+    "_meta": {
+      "title": "自定义Sigmas"
+    }
+  },
+  "222": {
+    "inputs": {
+      "temporal_tile_size": 56,
+      "temporal_overlap": 24,
+      "guiding_strength": 1,
+      "temporal_overlap_cond_strength": 0.5,
+      "cond_image_strength": 1,
+      "horizontal_tiles": 1,
+      "vertical_tiles": 1,
+      "spatial_overlap": 1,
+      "adain_factor": 0,
+      "guiding_start_step": 0,
+      "guiding_end_step": 1000,
+      "optional_cond_image_indices": "0",
+      "model": [
+        "229",
+        0
+      ],
+      "vae": [
+        "227",
+        2
+      ],
+      "noise": [
+        "235",
+        0
+      ],
+      "sampler": [
+        "236",
+        0
+      ],
+      "sigmas": [
+        "221",
+        0
+      ],
+      "guider": [
+        "223",
+        0
+      ],
+      "latents": [
+        "224",
+        0
+      ],
+      "optional_guiding_latents": [
+        "224",
+        0
+      ]
+    },
+    "class_type": "LTXVLoopingSampler",
+    "_meta": {
+      "title": "🅛🅣🅧 LTXV Looping Sampler"
+    }
+  },
+  "223": {
+    "inputs": {
+      "cfg": 1,
+      "model": [
+        "229",
+        0
+      ],
+      "positive": [
+        "231",
+        0
+      ],
+      "negative": [
+        "231",
+        1
+      ]
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "CFG引导器"
+    }
+  },
+  "224": {
+    "inputs": {
+      "tile_size": 512,
+      "overlap": 64,
+      "temporal_size": 500,
+      "temporal_overlap": 4,
+      "pixels": [
+        "233",
+        0
+      ],
+      "vae": [
+        "227",
+        2
+      ]
+    },
+    "class_type": "VAEEncodeTiled",
+    "_meta": {
+      "title": "VAE编码分块）"
+    }
+  },
+  "225": {
+    "inputs": {
+      "spatial_tiles": 4,
+      "spatial_overlap": 4,
+      "temporal_tile_length": 16,
+      "temporal_overlap": 4,
+      "last_frame_fix": false,
+      "working_device": "auto",
+      "working_dtype": "auto",
+      "vae": [
+        "227",
+        2
+      ],
+      "latents": [
+        "222",
+        0
+      ]
+    },
+    "class_type": "LTXVSpatioTemporalTiledVAEDecode",
+    "_meta": {
+      "title": "🅛🅣🅧 LTXV Spatio Temporal Tiled VAE Decode"
+    }
+  },
+  "226": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "228",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "227": {
+    "inputs": {
+      "ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint加载器（简易）"
+    }
+  },
+  "228": {
+    "inputs": {
+      "text_encoder": "gemma_3_12B_it_fp8_e4m3fn.safetensors",
+      "ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors",
+      "device": "default"
+    },
+    "class_type": "LTXAVTextEncoderLoader",
+    "_meta": {
+      "title": "LTXV音频文本编码器加载器"
+    }
+  },
+  "229": {
+    "inputs": {
+      "lora_name": "Ltx2.3-Licon-VBVR-I2V-96000-R32.safetensors",
+      "strength_model": 1,
+      "model": [
+        "227",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "230": {
+    "inputs": {
+      "video": "ComfyUI_00017__no_sub.mp4",
+      "force_rate": 0,
+      "custom_width": 0,
+      "custom_height": 0,
+      "frame_load_cap": 0,
+      "skip_first_frames": 0,
+      "select_every_nth": 1,
+      "format": "AnimateDiff"
+    },
+    "class_type": "VHS_LoadVideo",
+    "_meta": {
+      "title": "加载视频"
+    }
+  },
+  "231": {
+    "inputs": {
+      "frame_rate": [
+        "232",
+        0
+      ],
+      "positive": [
+        "226",
+        0
+      ],
+      "negative": [
+        "226",
+        0
+      ]
+    },
+    "class_type": "LTXVConditioning",
+    "_meta": {
+      "title": "LTXV条件"
+    }
+  },
+  "232": {
+    "inputs": {
+      "video_info": [
+        "230",
+        3
+      ]
+    },
+    "class_type": "VHS_VideoInfo",
+    "_meta": {
+      "title": "视频信息"
+    }
+  },
+  "233": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "largest_size": 1280,
+      "image": [
+        "230",
+        0
+      ]
+    },
+    "class_type": "ImageScaleToMaxDimension",
+    "_meta": {
+      "title": "图像缩放到最大尺寸"
+    }
+  },
+  "235": {
+    "inputs": {
+      "noise_seed": 42
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "随机噪波"
+    }
+  },
+  "236": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "K采样器选择"
+    }
+  },
+  "238": {
+    "inputs": {
+      "frame_rate": [
+        "232",
+        0
+      ],
+      "loop_count": 0,
+      "filename_prefix": "upscale/ltx2.3",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "225",
+        0
+      ],
+      "audio": [
+        "230",
+        2
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "合并为视频"
+    }
+  }
+}

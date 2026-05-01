@@ -1,0 +1,117 @@
+{
+  "66": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "37",
+        0
+      ],
+      "shift": 3.500000000000001
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "38",
+        0
+      ],
+      "text": " "
+    }
+  },
+  "38": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "39": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    }
+  },
+  "60": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "66",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "58",
+        0
+      ],
+      "seed": 978029224867617,
+      "steps": "randomize",
+      "cfg": 6,
+      "sampler_name": 1,
+      "scheduler": "simple",
+      "denoise": "simple"
+    }
+  },
+  "71": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "在别墅的客厅里，一个女人，坐在沙发上，她有着白皙的皮肤，黑色长发。她手里拿着一本名为“时尚芭莎”的时尚杂志，客厅装修风格为中式风格，墙上，挂着一幅字，写着“室雅兰香”"
+    }
+  },
+  "58": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1328,
+      "height": 784,
+      "batch_size": 1
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "38",
+        0
+      ],
+      "text": "封面设计，动态构图，蓝色背景，梦幻场景，右边是一个年轻中国美女，美女拥有白皙的皮肤，俏皮可爱，穿着蕾丝公主裙，轮廓光，左边主体文字是黄色充气字母组成的“ComfyUI APP”。下面写着：PyTorch2.8.0+cu128"
+    }
+  },
+  "37": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2512_fp8_e4m3fn_scaled_comfyui_4steps_v1.0.safetensors",
+      "weight_dtype": "default"
+    }
+  }
+}

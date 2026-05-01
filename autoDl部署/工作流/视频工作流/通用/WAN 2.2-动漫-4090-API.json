@@ -1,0 +1,418 @@
+{
+  "3": {
+    "inputs": {
+      "lora_name": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+      "strength_model": 0.8000000000000002,
+      "model": [
+        "41",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "4": {
+    "inputs": {
+      "lora_name": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+      "strength_model": 0.8000000000000002,
+      "model": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "7": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": 189563456434579,
+      "steps": 8,
+      "cfg": 2,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 0,
+      "end_at_step": [
+        "70",
+        1
+      ],
+      "return_with_leftover_noise": "enable",
+      "model": [
+        "46",
+        0
+      ],
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "22",
+        1
+      ],
+      "latent_image": [
+        "22",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "字字动画-超"
+    }
+  },
+  "8": {
+    "inputs": {
+      "add_noise": "disable",
+      "noise_seed": 934608834207706,
+      "steps": 8,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": [
+        "70",
+        1
+      ],
+      "end_at_step": 10000,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "47",
+        0
+      ],
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "22",
+        1
+      ],
+      "latent_image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "字字动画-超"
+    }
+  },
+  "9": {
+    "inputs": {
+      "samples": [
+        "8",
+        0
+      ],
+      "vae": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "12": {
+    "inputs": {
+      "text": "替换正向提示词",
+      "clip": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "13": {
+    "inputs": {
+      "text": "低分辨率、错误、最差质量、低质量、残缺、多余的手指、比例不良，细节模糊不清，字幕，",
+      "clip": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "加载VAE"
+    }
+  },
+  "16": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "加载CLIP"
+    }
+  },
+  "22": {
+    "inputs": {
+      "width": [
+        "32",
+        3
+      ],
+      "height": [
+        "32",
+        4
+      ],
+      "length": [
+        "69",
+        1
+      ],
+      "batch_size": 1,
+      "positive": [
+        "12",
+        0
+      ],
+      "negative": [
+        "13",
+        0
+      ],
+      "vae": [
+        "15",
+        0
+      ],
+      "start_image": [
+        "32",
+        0
+      ],
+      "end_image": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "WanFirstLastFrameToVideo",
+    "_meta": {
+      "title": "Wan首尾帧转视频"
+    }
+  },
+  "30": {
+    "inputs": {
+      "fps": [
+        "77",
+        0
+      ],
+      "images": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "创建视频"
+    }
+  },
+  "31": {
+    "inputs": {
+      "filename_prefix": "video/Chao",
+      "format": "auto",
+      "codec": "auto",
+      "video": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "保存视频"
+    }
+  },
+  "32": {
+    "inputs": {
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "crop",
+      "method": "bicubic",
+      "round_to_multiple": "32",
+      "scale_to_side": "longest",
+      "scale_to_length": [
+        "78",
+        0
+      ],
+      "background_color": "#000000",
+      "image": [
+        "73",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "图层工具：按宽高比缩放 V2"
+    }
+  },
+  "41": {
+    "inputs": {
+      "unet_name": "DasiwaWAN22I2V14BV8V1_tastysinHighV81.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "42": {
+    "inputs": {
+      "unet_name": "DasiwaWAN22I2V14BV8V1_tastysinLowV81.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "44": {
+    "inputs": {
+      "sage_attention": "sageattn_qk_int8_pv_fp8_cuda",
+      "allow_compile": true,
+      "model": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "45": {
+    "inputs": {
+      "sage_attention": "sageattn_qk_int8_pv_fp8_cuda",
+      "allow_compile": true,
+      "model": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "46": {
+    "inputs": {
+      "shift": 6,
+      "model": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "采样算法（SD3）"
+    }
+  },
+  "47": {
+    "inputs": {
+      "shift": 6,
+      "model": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "采样算法（SD3）"
+    }
+  },
+  "69": {
+    "inputs": {
+      "expression": "1+ 8*(round(a*b)/8)",
+      "a": [
+        "76",
+        0
+      ],
+      "b": [
+        "77",
+        0
+      ]
+    },
+    "class_type": "SimpleCalculatorKJ",
+    "_meta": {
+      "title": "Simple Calculator KJ"
+    }
+  },
+  "70": {
+    "inputs": {
+      "expression": "a/2",
+      "a": [
+        "75",
+        0
+      ]
+    },
+    "class_type": "SimpleCalculatorKJ",
+    "_meta": {
+      "title": "Simple Calculator KJ"
+    }
+  },
+  "73": {
+    "inputs": {
+      "image": "替换为首帧图.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "首帧"
+    }
+  },
+  "74": {
+    "inputs": {
+      "image": "替换为尾帧图.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "尾帧"
+    }
+  },
+  "75": {
+    "inputs": {
+      "value": 8
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "INT Constant"
+    }
+  },
+  "76": {
+    "inputs": {
+      "value": 5
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "INT Constant"
+    }
+  },
+  "77": {
+    "inputs": {
+      "value": 16
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "78": {
+    "inputs": {
+      "value": 960
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "INT Constant"
+    }
+  }
+}

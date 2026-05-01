@@ -1,0 +1,25 @@
+# FastAPI + Server
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+websockets==15.0.1
+python-multipart==0.0.20
+
+# Database
+aiosqlite==0.21.0
+
+# LLM
+litellm==1.72.4
+
+# MCP
+mcp==1.9.3
+
+# Security
+cryptography==44.0.3
+PyJWT==2.10.1
+bcrypt==4.3.0
+
+# Utilities
+pydantic==2.11.3
+python-dotenv==1.1.0
+uuid7==0.1.0
+tiktoken==0.9.0

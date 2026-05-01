@@ -1,0 +1,162 @@
+{
+  "13": {
+    "class_type": "Reference Resize",
+    "inputs": {
+      "reference_image": [
+        "3",
+        0
+      ],
+      "images": [
+        "17",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "PixPin_2025-05-22_20-19-13.jpg"
+    }
+  },
+  "17": {
+    "class_type": "LayerMask: BiRefNetUltraV2",
+    "inputs": {
+      "image": [
+        "2",
+        0
+      ],
+      "birefnet_model": [
+        "18",
+        0
+      ],
+      "detail_method": "VITMatte",
+      "detail_erode": 4,
+      "detail_dilate": 2,
+      "black_point": 0.010000000000000002,
+      "white_point": 0.99,
+      "process_detail": false,
+      "device": "cuda",
+      "max_megapixels": 2
+    }
+  },
+  "24": {
+    "class_type": "LoadLBMModel",
+    "inputs": {
+      "model": "lbm_relight.safetensors",
+      "base_precision": "bf16",
+      "load_device": "main_device"
+    }
+  },
+  "16": {
+    "class_type": "ImageScaleBy",
+    "inputs": {
+      "image": [
+        "13",
+        0
+      ],
+      "upscale_method": "bilinear",
+      "scale_by": 0.9000000000000001
+    }
+  },
+  "23": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "25",
+        0
+      ],
+      "filename_prefix": "LBM-Repaint-ex"
+    }
+  },
+  "22": {
+    "class_type": "Image Align",
+    "inputs": {
+      "image_bg": [
+        "3",
+        0
+      ],
+      "images_fg": [
+        "16",
+        0
+      ],
+      "align": "◣ bottom left",
+      "offset_x": 12,
+      "offset_y": 0
+    }
+  },
+  "2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "00186-3579254636.png"
+    }
+  },
+  "29": {
+    "class_type": "ImageCompare",
+    "inputs": {
+      "image_a": [
+        "25",
+        0
+      ],
+      "image_b": [
+        "20",
+        0
+      ],
+      "compare_view": {
+        "before": "/api/view?filename=comfy.compare.a_temp_rdsbk_00001_.png&subfolder=&type=temp&rand=0.5931190787548779",
+        "after": "/api/view?filename=comfy.compare.b_temp_rdsbk_00001_.png&subfolder=&type=temp&rand=0.5931190787548779"
+      }
+    }
+  },
+  "20": {
+    "class_type": "To RGB",
+    "inputs": {
+      "images": [
+        "22",
+        0
+      ]
+    }
+  },
+  "25": {
+    "class_type": "LBMSampler",
+    "inputs": {
+      "model": [
+        "24",
+        0
+      ],
+      "image": [
+        "20",
+        0
+      ],
+      "steps": 20
+    }
+  },
+  "32": {
+    "class_type": "Image Comparer (rgthree)",
+    "inputs": {
+      "image_a": [
+        "20",
+        0
+      ],
+      "image_b": [
+        "25",
+        0
+      ]
+    }
+  },
+  "26": {
+    "class_type": "Preview Image-JPEG",
+    "inputs": {
+      "images": [
+        "20",
+        0
+      ],
+      "quality": 0.5
+    }
+  },
+  "18": {
+    "class_type": "LayerMask: LoadBiRefNetModelV2",
+    "inputs": {
+      "version": "BiRefNet-General"
+    }
+  }
+}

@@ -1,0 +1,278 @@
+from __future__ import annotations
+
+import json
+import time
+import logging
+from typing import AsyncIterator, Any
+
+from ..db.database import get_db
+from ..llm.client import LLMClient, LLMStreamChunk
+from ..tools.registry import ToolRegistry
+from ..core.config import get_settings
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_SYSTEM_PROMPT = """你是一个智能助手，能够帮助用户完成各种任务。
+你可以使用工具来执行操作，例如执行命令、读写文件、搜索内容、发送HTTP请求等。
+在使用工具时，请确认操作意图后再执行。回答请使用用户的语言。"""
+
+MAX_TOOL_ROUNDS = 10
+MAX_HISTORY_MESSAGES = 50
+
+
+class AgentLoop:
+    """
+    Single user-message → Agent reasoning loop.
+
+    Flow:
+    1. Load session history
+    2. Check for /slash-command → Skill match
+    3. Assemble messages (system + history + user)
+    4. LLM call (streaming)
+    5. If tool_calls → execute tools → inject tool messages → continue LLM
+    6. Loop until no tool_calls or max rounds reached
+    """
+
+    def __init__(self, llm: LLMClient, tools: ToolRegistry):
+        self.llm = llm
+        self.tools = tools
+        self.settings = get_settings()
+
+    async def run(
+        self,
+        session_id: str,
+        user_content: str,
+        model_override: str = "",
+        system_prompt_override: str = "",
+    ) -> AsyncIterator[dict]:
+        """Main entry: yields SSE events."""
+        model = model_override or self.settings.llm_default_model
+        start_time = time.time()
+
+        # Check slash command → Skill match
+        skill = None
+        actual_content = user_content
+        if user_content.startswith("/"):
+            skill, actual_content = await self._check_slash_command(user_content)
+
+        # Build system prompt
+        system_prompt = system_prompt_override or DEFAULT_SYSTEM_PROMPT
+        if skill:
+            system_prompt = skill["content"]
+            if skill.get("argument_hint"):
+                system_prompt += f"\n\nArgument hint: {skill['argument_hint']}"
+
+        # Load history
+        history = await self._load_history(session_id)
+
+        # Assemble messages
+        messages: list[dict[str, Any]] = [{"role": "system", "content": system_prompt}]
+        messages.extend(history)
+        messages.append({"role": "user", "content": actual_content})
+
+        # Build tool schemas
+        tool_schemas = self._get_tool_schemas(skill)
+
+        # Agent loop
+        total_input_tokens = 0
+        total_output_tokens = 0
+        all_tool_calls: list[dict] = []
+
+        for round_num in range(MAX_TOOL_ROUNDS):
+            round_text = ""
+            round_tool_calls: list[dict] = []
+
+            try:
+                stream = await self.llm.chat(
+                    model=model,
+                    messages=messages,
+                    tools=tool_schemas if tool_schemas else None,
+                    stream=True,
+                )
+
+                async for chunk in stream:
+                    if chunk.text:
+                        round_text += chunk.text
+                        yield {"type": "delta", "content": chunk.text}
+
+                    if chunk.is_done:
+                        total_input_tokens += chunk.input_tokens
+                        total_output_tokens += chunk.output_tokens
+                        if chunk.tool_calls:
+                            round_tool_calls = chunk.tool_calls
+
+            except Exception as e:
+                import traceback
+                tb = traceback.format_exc()
+                err_msg = f"{type(e).__name__}: {e}" if str(e) else f"{type(e).__name__}: {repr(e)}"
+                logger.error(f"LLM error in round {round_num}: {err_msg}\n{tb}")
+                yield {"type": "error", "message": f"LLM 调用失败: {err_msg}"}
+                return
+
+            # If no tool calls, we're done
+            if not round_tool_calls:
+                break
+
+            # Append assistant message with tool_calls
+            assistant_msg: dict[str, Any] = {"role": "assistant", "content": round_text or None}
+            assistant_msg["tool_calls"] = round_tool_calls
+            messages.append(assistant_msg)
+
+            # Emit tool_calls event
+            yield {
+                "type": "tool_calls",
+                "tool_calls": round_tool_calls,
+            }
+
+            # Execute each tool call
+            for tc in round_tool_calls:
+                tc_id = tc.get("id", "")
+                func = tc.get("function", {})
+                tool_name = func.get("name", "")
+                arguments_str = func.get("arguments", "{}")
+
+                try:
+                    arguments = json.loads(arguments_str) if isinstance(arguments_str, str) else arguments_str
+                except json.JSONDecodeError:
+                    arguments = {"raw": arguments_str}
+
+                yield {
+                    "type": "tool_start",
+                    "tool_call_id": tc_id,
+                    "name": tool_name,
+                    "arguments": arguments,
+                }
+
+                # Execute
+                try:
+                    result = await self.tools.execute(tool_name, arguments)
+                except Exception as e:
+                    result = {"error": str(e)}
+                    logger.error(f"Tool {tool_name} execution error: {e}")
+
+                all_tool_calls.append({
+                    "tool_call_id": tc_id,
+                    "name": tool_name,
+                    "arguments": arguments,
+                    "result": result,
+                })
+
+                yield {
+                    "type": "tool_result",
+                    "tool_call_id": tc_id,
+                    "name": tool_name,
+                    "result": result,
+                }
+
+                # Append tool result message
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc_id,
+                    "content": json.dumps(result, ensure_ascii=False),
+                })
+
+            # Continue to next round (LLM sees tool results)
+
+        # Done
+        elapsed_ms = int((time.time() - start_time) * 1000)
+        yield {
+            "type": "done",
+            "metadata": {
+                "model": model,
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+                "latency_ms": elapsed_ms,
+                "tool_rounds": len(all_tool_calls),
+                "skill": skill["name"] if skill else None,
+            },
+        }
+
+    async def _check_slash_command(self, content: str) -> tuple[dict | None, str]:
+        """
+        Match /skill-name [args]
+        Returns (skill_dict | None, actual_user_content)
+        """
+        parts = content.split(None, 1)
+        command = parts[0][1:]  # remove leading /
+        args = parts[1] if len(parts) > 1 else ""
+
+        db = await get_db()
+        row = await db.execute(
+            "SELECT * FROM skills WHERE name = ? COLLATE NOCASE",
+            (command,),
+        )
+        skill = await row.fetchone()
+        if skill:
+            skill_dict = dict(skill)
+            # Parse JSON fields
+            for k in ("allowed_tools", "arguments", "variables", "required_tools", "tags"):
+                if k in skill_dict and isinstance(skill_dict[k], str):
+                    try:
+                        skill_dict[k] = json.loads(skill_dict[k])
+                    except Exception:
+                        pass
+
+            # Replace $ARGUMENTS in content
+            if args and skill_dict.get("content"):
+                skill_dict["content"] = skill_dict["content"].replace("$ARGUMENTS", args)
+
+            actual_content = args if args else f"请使用 {skill_dict['name']} 技能"
+            return skill_dict, actual_content
+
+        # No match: return original content without /
+        return None, content
+
+    async def _load_history(self, session_id: str) -> list[dict[str, Any]]:
+        """Load recent message history for context."""
+        db = await get_db()
+        rows = await db.execute(
+            """SELECT role, content, tool_calls, tool_call_id, name
+               FROM chat_messages
+               WHERE session_id = ?
+               ORDER BY created_at DESC
+               LIMIT ?""",
+            (session_id, MAX_HISTORY_MESSAGES),
+        )
+        items = await rows.fetchall()
+
+        messages = []
+        for r in reversed(items):  # reverse to chronological order
+            msg: dict[str, Any] = {"role": r["role"], "content": r["content"] or ""}
+            if r["role"] == "assistant" and r["tool_calls"]:
+                tc = r["tool_calls"]
+                if isinstance(tc, str):
+                    try:
+                        tc = json.loads(tc)
+                    except Exception:
+                        tc = None
+                if tc:
+                    msg["tool_calls"] = tc
+            if r["role"] == "tool":
+                if r["tool_call_id"]:
+                    msg["tool_call_id"] = r["tool_call_id"]
+                if r["name"]:
+                    msg["name"] = r["name"]
+            messages.append(msg)
+        return messages
+
+    def _get_tool_schemas(self, skill: dict | None = None) -> list[dict]:
+        """Build OpenAI-format tool schemas for LLM."""
+        if skill and skill.get("allowed_tools"):
+            # Skill restricts which tools are available
+            allowed = skill["allowed_tools"]
+            schemas = []
+            for name in allowed:
+                tool = self.tools.get(name)
+                if tool:
+                    schemas.append(tool.schema)
+            return schemas
+
+        # Default: all builtin tools
+        all_tools = self.tools.list_all()
+        schemas = []
+        for t in all_tools:
+            if t.get("is_enabled", True):
+                tool_obj = self.tools.get(t["name"])
+                if tool_obj:
+                    schemas.append(tool_obj.schema)
+        return schemas

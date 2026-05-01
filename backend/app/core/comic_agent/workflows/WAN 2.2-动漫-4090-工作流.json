@@ -1,0 +1,357 @@
+{
+  "3": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "41",
+        0
+      ],
+      "lora_name": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+      "strength_model": 0.8000000000000002
+    }
+  },
+  "4": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "42",
+        0
+      ],
+      "lora_name": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+      "strength_model": 0.8000000000000002
+    }
+  },
+  "7": {
+    "class_type": "KSamplerAdvanced",
+    "inputs": {
+      "model": [
+        "46",
+        0
+      ],
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "22",
+        1
+      ],
+      "latent_image": [
+        "22",
+        2
+      ],
+      "end_at_step": [
+        "66",
+        1
+      ],
+      "add_noise": "enable",
+      "noise_seed": 189563456434579,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "simple",
+      "start_at_step": 0,
+      "return_with_leftover_noise": "disable"
+    }
+  },
+  "8": {
+    "class_type": "KSamplerAdvanced",
+    "inputs": {
+      "model": [
+        "47",
+        0
+      ],
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "22",
+        1
+      ],
+      "latent_image": [
+        "7",
+        0
+      ],
+      "start_at_step": [
+        "66",
+        1
+      ],
+      "add_noise": "disable",
+      "noise_seed": 934608834207706,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler_cfg_pp",
+      "scheduler": "simple",
+      "end_at_step": 10000,
+      "return_with_leftover_noise": "disable"
+    }
+  },
+  "9": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "8",
+        0
+      ],
+      "vae": [
+        "15",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "16",
+        0
+      ],
+      "text": "低分辨率、错误、最差质量、低质量、残缺、多余的手指、比例不良，细节模糊不清，字幕，"
+    }
+  },
+  "15": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    }
+  },
+  "16": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    }
+  },
+  "22": {
+    "class_type": "WanFirstLastFrameToVideo",
+    "inputs": {
+      "positive": [
+        "12",
+        0
+      ],
+      "negative": [
+        "13",
+        0
+      ],
+      "vae": [
+        "15",
+        0
+      ],
+      "start_image": [
+        "32",
+        0
+      ],
+      "end_image": [
+        "23",
+        0
+      ],
+      "width": [
+        "32",
+        3
+      ],
+      "height": [
+        "32",
+        4
+      ],
+      "length": [
+        "65",
+        1
+      ],
+      "batch_size": 1
+    }
+  },
+  "30": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "9",
+        0
+      ],
+      "fps": [
+        "63",
+        0
+      ]
+    }
+  },
+  "32": {
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "inputs": {
+      "image": [
+        "19",
+        0
+      ],
+      "scale_to_length": [
+        "64",
+        0
+      ],
+      "aspect_ratio": "custom",
+      "proportional_width": 1,
+      "proportional_height": 20,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "background_color": "#000000"
+    }
+  },
+  "41": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "DasiwaWAN22I2V14BV8V1_tastysinHighV81.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "42": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "DasiwaWAN22I2V14BV8V1_tastysinLowV81.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "44": {
+    "class_type": "PathchSageAttentionKJ",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "sage_attention": "sageattn_qk_int8_pv_fp16_triton",
+      "allow_compile": true
+    }
+  },
+  "45": {
+    "class_type": "PathchSageAttentionKJ",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "sage_attention": "sageattn_qk_int8_pv_fp16_triton",
+      "allow_compile": true
+    }
+  },
+  "46": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "53",
+        0
+      ],
+      "shift": 5.000000000000001
+    }
+  },
+  "47": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "52",
+        0
+      ],
+      "shift": 5.000000000000001
+    }
+  },
+  "52": {
+    "class_type": "ModelPatchTorchSettings",
+    "inputs": {
+      "model": [
+        "45",
+        0
+      ],
+      "enable_fp16_accumulation": true
+    }
+  },
+  "53": {
+    "class_type": "ModelPatchTorchSettings",
+    "inputs": {
+      "model": [
+        "44",
+        0
+      ],
+      "enable_fp16_accumulation": true
+    }
+  },
+  "31": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "30",
+        0
+      ],
+      "filename_prefix": "video/ComfyUI",
+      "format": "auto",
+      "codec": "auto"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "替换为尾帧图.png"
+    }
+  },
+  "19": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "替换为首帧图.png"
+    }
+  },
+  "64": {
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 1280
+    }
+  },
+  "12": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "16",
+        0
+      ],
+      "text": "替换正向提示词"
+    }
+  },
+  "63": {
+    "class_type": "FloatConstant",
+    "inputs": {
+      "value": 16
+    }
+  },
+  "62": {
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 5
+    }
+  },
+  "67": {
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 8
+    }
+  },
+  "66": {
+    "class_type": "SimpleCalculatorKJ",
+    "inputs": {
+      "a": [
+        "67",
+        0
+      ],
+      "expression": "a/2"
+    }
+  },
+  "65": {
+    "class_type": "SimpleCalculatorKJ",
+    "inputs": {
+      "a": [
+        "62",
+        0
+      ],
+      "b": [
+        "63",
+        0
+      ],
+      "expression": "1+ 8*(round(a*b)/8)"
+    }
+  }
+}

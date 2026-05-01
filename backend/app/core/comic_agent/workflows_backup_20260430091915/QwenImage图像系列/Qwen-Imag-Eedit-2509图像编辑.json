@@ -1,0 +1,419 @@
+{
+  "75": {
+    "class_type": "CFGNorm",
+    "inputs": {
+      "model": [
+        "66",
+        0
+      ],
+      "strength": 1
+    }
+  },
+  "39": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    }
+  },
+  "38": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "66": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "89",
+        0
+      ],
+      "shift": 3
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "75",
+        0
+      ],
+      "positive": [
+        "111",
+        0
+      ],
+      "negative": [
+        "110",
+        0
+      ],
+      "latent_image": [
+        "88",
+        0
+      ],
+      "seed": 423207994106970,
+      "steps": "randomize",
+      "cfg": 4,
+      "sampler_name": 1,
+      "scheduler": "simple",
+      "denoise": "simple"
+    }
+  },
+  "60": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "112": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "88": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "93",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    }
+  },
+  "110": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "38",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "image1": [
+        "93",
+        0
+      ],
+      "image2": [
+        "106",
+        0
+      ],
+      "image3": [
+        "108",
+        0
+      ],
+      "prompt": ""
+    }
+  },
+  "89": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "37",
+        0
+      ],
+      "lora_name": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
+      "strength_model": 1
+    }
+  },
+  "335": {
+    "class_type": "CFGNorm",
+    "inputs": {
+      "model": [
+        "339",
+        0
+      ],
+      "strength": 1
+    }
+  },
+  "337": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    }
+  },
+  "338": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "340": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "335",
+        0
+      ],
+      "positive": [
+        "383",
+        0
+      ],
+      "negative": [
+        "383",
+        1
+      ],
+      "latent_image": [
+        "375",
+        0
+      ],
+      "seed": 327441425675527,
+      "steps": "randomize",
+      "cfg": 4,
+      "sampler_name": 1,
+      "scheduler": "simple",
+      "denoise": "simple"
+    }
+  },
+  "341": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_edit_2509_fp8_e4m3fn.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "345": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "354": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "341",
+        0
+      ],
+      "lora_name": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors",
+      "strength_model": 1
+    }
+  },
+  "339": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "354",
+        0
+      ],
+      "shift": 3
+    }
+  },
+  "336": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "340",
+        0
+      ],
+      "vae": [
+        "337",
+        0
+      ]
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ]
+    }
+  },
+  "93": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": {
+      "image": [
+        "78",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    }
+  },
+  "377": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "344",
+        0
+      ],
+      "vae": [
+        "337",
+        0
+      ]
+    }
+  },
+  "375": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "349",
+        0
+      ],
+      "vae": [
+        "337",
+        0
+      ]
+    }
+  },
+  "376": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "343",
+        0
+      ],
+      "vae": [
+        "337",
+        0
+      ]
+    }
+  },
+  "347": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "338",
+        0
+      ],
+      "prompt": ""
+    }
+  },
+  "342": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "336",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "383": {
+    "class_type": "c46c74c1-cfc4-41eb-81a8-9c6701737ef6",
+    "inputs": {
+      "latent_2": [
+        "375",
+        0
+      ],
+      "latent": [
+        "376",
+        0
+      ],
+      "latent_1": [
+        "377",
+        0
+      ],
+      "conditioning": [
+        "348",
+        0
+      ],
+      "conditioning_1": [
+        "347",
+        0
+      ]
+    }
+  },
+  "348": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "338",
+        0
+      ],
+      "prompt": "让图 2 的机器人按照图 3 的姿势出现在图 1 的场景中"
+    }
+  },
+  "349": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "image_qwen_image_edit_2509_input_image.png"
+    }
+  },
+  "343": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "image_qwen_image_edit_2509_input_image.png"
+    }
+  },
+  "344": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "image_qwen_image_edit_2509_input_image.png"
+    }
+  },
+  "106": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "image_qwen_image_edit_2509_input_image.png"
+    }
+  },
+  "108": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "image_qwen_image_edit_2509_input_image.png"
+    }
+  },
+  "37": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_edit_2509_fp8_e4m3fn_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "78": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "qwen-image-edit2509-input.png"
+    }
+  },
+  "111": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "38",
+        0
+      ],
+      "vae": [
+        "39",
+        0
+      ],
+      "image1": [
+        "93",
+        0
+      ],
+      "image2": [
+        "106",
+        0
+      ],
+      "image3": [
+        "108",
+        0
+      ],
+      "prompt": "用一只斑点狗替换那只猫"
+    }
+  }
+}

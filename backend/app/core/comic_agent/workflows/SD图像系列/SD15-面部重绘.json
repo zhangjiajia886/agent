@@ -1,0 +1,202 @@
+{
+  "13": {
+    "class_type": "BboxDetectorSEGS",
+    "inputs": {
+      "bbox_detector": [
+        "10",
+        0
+      ],
+      "image": [
+        "8",
+        0
+      ],
+      "threshold": 0.5,
+      "dilation": 10,
+      "crop_factor": 3,
+      "drop_size": 10,
+      "labels": "all"
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ],
+      "seed": 132792427771467,
+      "steps": 20,
+      "cfg": 20,
+      "sampler_name": "dpm_2",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "anything-v5-PrtRE.safetensors"
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "4",
+        1
+      ],
+      "text": "1girl"
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "4",
+        1
+      ],
+      "text": "embedding:EasyNegative, "
+    }
+  },
+  "10": {
+    "class_type": "UltralyticsDetectorProvider",
+    "inputs": {
+      "model_name": "bbox/face_yolov8m.pt"
+    }
+  },
+  "15": {
+    "class_type": "ToBasicPipe",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ],
+      "vae": [
+        "4",
+        2
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "11",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    }
+  },
+  "20": {
+    "class_type": "Image Comparer (rgthree)",
+    "inputs": {
+      "image_a": [
+        "11",
+        0
+      ],
+      "image_b": [
+        "8",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "DetailerForEachPipe",
+    "inputs": {
+      "image": [
+        "8",
+        0
+      ],
+      "segs": [
+        "13",
+        0
+      ],
+      "basic_pipe": [
+        "15",
+        0
+      ],
+      "guide_size": 512,
+      "guide_size_for": true,
+      "max_size": 1024,
+      "seed": 292911238536405,
+      "steps": 20,
+      "cfg": 8.0,
+      "sampler_name": "dpm_2",
+      "scheduler": "simple",
+      "denoise": 0.4,
+      "feather": 5,
+      "noise_mask": true,
+      "force_inpaint": true,
+      "wildcard": "",
+      "refiner_ratio": 1.0,
+      "cycle": 1,
+      "detailer_hook": null,
+      "refiner_basic_pipe_opt": null,
+      "inpaint_model": false,
+      "noise_mask_feather": 20,
+      "scheduler_func_opt": null
+    }
+  },
+  "21": {
+    "class_type": "ImageCompare",
+    "inputs": {
+      "image_a": [
+        "11",
+        0
+      ],
+      "image_b": [
+        "8",
+        0
+      ],
+      "compare_view": {
+        "before": "/api/view?filename=comfy.compare.a_temp_ktmno_00001_.png&subfolder=&type=temp&rand=0.7700480639630866",
+        "after": "/api/view?filename=comfy.compare.b_temp_ktmno_00001_.png&subfolder=&type=temp&rand=0.7700480639630866"
+      }
+    }
+  }
+}

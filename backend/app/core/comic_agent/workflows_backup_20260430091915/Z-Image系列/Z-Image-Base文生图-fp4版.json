@@ -1,0 +1,111 @@
+{
+  "70": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "66",
+        0
+      ],
+      "shift": 3
+    }
+  },
+  "69": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "70",
+        0
+      ],
+      "positive": [
+        "67",
+        0
+      ],
+      "negative": [
+        "71",
+        0
+      ],
+      "latent_image": [
+        "68",
+        0
+      ],
+      "seed": 1117285144475389,
+      "steps": "randomize",
+      "cfg": 25,
+      "sampler_name": 4,
+      "scheduler": "res_multistep",
+      "denoise": "simple"
+    }
+  },
+  "68": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "63": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "62": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "lumina2",
+      "device": "default"
+    }
+  },
+  "71": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "62",
+        0
+      ],
+      "text": ""
+    }
+  },
+  "65": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "69",
+        0
+      ],
+      "vae": [
+        "63",
+        0
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "65",
+        0
+      ],
+      "filename_prefix": "z-image"
+    }
+  },
+  "66": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "z-image-base-nvfp4_ultra.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "67": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "62",
+        0
+      ],
+      "text": "一幅充满超现实浪漫主义的时尚摄影作品，采用低角度仰拍构图，以清澈的淡蓝色天空为背景，视觉焦点集中在奇幻的蓝色植被和穿行其间的模特身上。\n画面中的植被被处理成深浅不一的蓝色，从浅冰蓝到深钴蓝不等。树叶和枝条的纹理细腻逼真。温暖的棕色树干与冷调的蓝色树叶形成鲜明对比，宛如一个来自异世界的梦幻森林。一位非洲裔美国模特身着黄白竖条纹长裙，在沙地上缓缓漫步。长裙的暖色调与周围冷调的蓝色植被相互呼应。正午的阳光在沙地上投下清晰的阴影，增强了画面的空间感和真实感。"
+    }
+  }
+}

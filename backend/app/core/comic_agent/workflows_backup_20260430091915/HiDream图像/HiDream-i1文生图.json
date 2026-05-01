@@ -1,0 +1,112 @@
+{
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "70",
+        0
+      ],
+      "positive": [
+        "16",
+        0
+      ],
+      "negative": [
+        "40",
+        0
+      ],
+      "latent_image": [
+        "53",
+        0
+      ],
+      "seed": 68894529396008,
+      "steps": "randomize",
+      "cfg": 28,
+      "sampler_name": 1,
+      "scheduler": "lcm",
+      "denoise": "simple"
+    }
+  },
+  "70": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "69",
+        0
+      ],
+      "shift": 6.000000000000001
+    }
+  },
+  "54": {
+    "class_type": "QuadrupleCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l_hidream.safetensors",
+      "clip_name2": "clip_g_hidream.safetensors",
+      "clip_name3": "t5xxl_fp8_e4m3fn_scaled.safetensors",
+      "clip_name4": "llama_3.1_8b_instruct_fp8_scaled.safetensors"
+    }
+  },
+  "69": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "hidream_i1_dev_fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    }
+  },
+  "16": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "54",
+        0
+      ],
+      "text": "一个漂亮的女人站在酒店门前，手里拿着手机"
+    }
+  },
+  "55": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "55",
+        0
+      ]
+    }
+  },
+  "40": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "54",
+        0
+      ],
+      "text": "bad ugly jpeg artifacts"
+    }
+  },
+  "53": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  }
+}

@@ -1,0 +1,600 @@
+{
+  "generated_at": "2026-04-30T19:40:12.993258",
+  "credential_source": "/private/tmp/test_jimeng_full_debug.py",
+  "assets": {
+    "reference_image": "/Users/zjj/home/learn26/ttsapp/backend/comic_api_test/jimeng_full_flow/assets/girl.png",
+    "jimeng_panel": "/Users/zjj/home/learn26/ttsapp/backend/comic_api_test/jimeng_full_flow/assets/panel_1.png",
+    "audio_mandarin": "/Users/zjj/home/learn26/ttsapp/backend/comic_api_test/jimeng_full_flow/assets/female_mandarin.wav"
+  },
+  "doc_results": [
+    {
+      "id": "quickstart",
+      "name": "快速入门",
+      "priority": "P0-doc",
+      "url": "https://www.volcengine.com/docs/85621/1995636?lang=zh",
+      "tool": "n/a",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": false,
+        "has_version": true,
+        "has_req_key": false,
+        "has_async": true,
+        "has_request_url": false
+      },
+      "elapsed": 0.56,
+      "text_size": 263275
+    },
+    {
+      "id": "image_46",
+      "name": "即梦AI-图片生成4.6",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/2275082?lang=zh",
+      "tool": "jimeng_generate_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.53,
+      "text_size": 445821
+    },
+    {
+      "id": "image_40",
+      "name": "即梦AI-图片生成4.0",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1817045?lang=zh",
+      "tool": "jimeng_generate_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.99,
+      "text_size": 446991
+    },
+    {
+      "id": "image_40_sp",
+      "name": "即梦AI-图片生成4.0 SP",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1863351",
+      "tool": "jimeng_generate_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.57,
+      "text_size": 448665
+    },
+    {
+      "id": "pod_material",
+      "name": "即梦AI-素材提取(POD按需定制)",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1537648",
+      "tool": "jimeng_product_material",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 1.13,
+      "text_size": 375574
+    },
+    {
+      "id": "product_extract",
+      "name": "即梦AI-素材提取(商品提取)",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/2129114?lang=zh",
+      "tool": "jimeng_product_material",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.56,
+      "text_size": 367952
+    },
+    {
+      "id": "inpainting",
+      "name": "即梦AI-交互编辑inpainting",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1976207",
+      "tool": "jimeng_edit_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.71,
+      "text_size": 375149
+    },
+    {
+      "id": "upscale",
+      "name": "即梦AI-智能超清",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/2164806",
+      "tool": "jimeng_upscale_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.78,
+      "text_size": 371039
+    },
+    {
+      "id": "t2i_31",
+      "name": "即梦文生图3.1",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1756900?lang=zh",
+      "tool": "jimeng_generate_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.54,
+      "text_size": 376450
+    },
+    {
+      "id": "t2i_30",
+      "name": "即梦文生图3.0",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1616429?lang=zh",
+      "tool": "jimeng_generate_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.38,
+      "text_size": 354125
+    },
+    {
+      "id": "i2i_30_reference",
+      "name": "即梦图生图3.0智能参考",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1747301?lang=zh",
+      "tool": "jimeng_reference_image",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.7,
+      "text_size": 361546
+    },
+    {
+      "id": "marketing_image_30",
+      "name": "即梦AI-AI营销商品图3.0",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1956024",
+      "tool": "jimeng_product_material",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.8,
+      "text_size": 380331
+    },
+    {
+      "id": "video_30_pro",
+      "name": "即梦AI-视频生成3.0 Pro",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1777001?lang=zh",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.47,
+      "text_size": 362865
+    },
+    {
+      "id": "video_30_720p",
+      "name": "即梦AI-视频生成3.0 720P",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1792710?lang=zh",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": false,
+        "has_version": true,
+        "has_req_key": false,
+        "has_async": true,
+        "has_request_url": false
+      },
+      "elapsed": 0.44,
+      "text_size": 242742
+    },
+    {
+      "id": "video_30_1080p",
+      "name": "即梦AI-视频生成3.0 1080P",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1792711?lang=zh",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": false,
+        "has_version": true,
+        "has_req_key": false,
+        "has_async": true,
+        "has_request_url": false
+      },
+      "elapsed": 0.54,
+      "text_size": 242154
+    },
+    {
+      "id": "video_i2v_camera_720p",
+      "name": "即梦AI-视频生成3.0 720P-图生视频-运镜",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1785201?lang=zh",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.67,
+      "text_size": 350849
+    },
+    {
+      "id": "video_i2v_first_frame_720p",
+      "name": "即梦AI-视频生成3.0 720P-图生视频-首帧",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1785204",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.78,
+      "text_size": 345627
+    },
+    {
+      "id": "video_i2v_first_last_720p",
+      "name": "即梦AI-视频生成3.0 720P-图生视频-首尾帧",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1791184",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.6,
+      "text_size": 346690
+    },
+    {
+      "id": "video_i2v_first_last_1080p",
+      "name": "即梦AI-视频生成3.0 1080P-图生视频-首尾帧",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/1802721?lang=zh",
+      "tool": "jimeng_generate_video",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.49,
+      "text_size": 346770
+    },
+    {
+      "id": "motion_mimic",
+      "name": "动作模仿",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1798351",
+      "tool": "jimeng_motion_mimic",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 2.35,
+      "text_size": 339222
+    },
+    {
+      "id": "motion_mimic_20",
+      "name": "动作模仿2.0",
+      "priority": "P0",
+      "url": "https://www.volcengine.com/docs/85621/2201579?lang=zh",
+      "tool": "jimeng_motion_mimic",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.46,
+      "text_size": 361600
+    },
+    {
+      "id": "digital_human_intro",
+      "name": "数字人快速模式 OmniHuman1.0-产品介绍",
+      "priority": "P1-doc",
+      "url": "https://www.volcengine.com/docs/85621/1810468",
+      "tool": "jimeng_digital_human",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": false,
+        "has_version": true,
+        "has_req_key": false,
+        "has_async": true,
+        "has_request_url": false
+      },
+      "elapsed": 1.19,
+      "text_size": 255014
+    },
+    {
+      "id": "digital_human_detect",
+      "name": "数字人快速模式-调用步骤1：主体识别",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1810469?lang=zh",
+      "tool": "jimeng_digital_human",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.51,
+      "text_size": 310221
+    },
+    {
+      "id": "digital_human_generate",
+      "name": "数字人快速模式-调用步骤2：视频生成",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/1810471?lang=zh",
+      "tool": "jimeng_digital_human",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.68,
+      "text_size": 340062
+    },
+    {
+      "id": "video_translate_20",
+      "name": "视频翻译2.0",
+      "priority": "P1",
+      "url": "https://www.volcengine.com/docs/85621/2189006?lang=zh",
+      "tool": "jimeng_video_translate",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.6,
+      "text_size": 376786
+    },
+    {
+      "id": "xiaoyunque_video_agent_intro",
+      "name": "小云雀智能生视频 Agent",
+      "priority": "P2",
+      "url": "https://www.volcengine.com/docs/85621/2283633?lang=zh",
+      "tool": "jimeng_video_agent",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.46,
+      "text_size": 367893
+    },
+    {
+      "id": "xiaoyunque_video_agent_1",
+      "name": "小云雀智能生视频 Agent 1.0/2.0接口",
+      "priority": "P2",
+      "url": "https://www.volcengine.com/docs/85621/2359610?lang=zh",
+      "tool": "jimeng_video_agent",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.69,
+      "text_size": 366579
+    },
+    {
+      "id": "xiaoyunque_video_agent_2",
+      "name": "小云雀智能生视频 Agent 参考/无参考接口",
+      "priority": "P2",
+      "url": "https://www.volcengine.com/docs/85621/2359611?lang=zh",
+      "tool": "jimeng_video_agent",
+      "doc_status": "reachable",
+      "http_status": 200,
+      "title": "",
+      "signals": {
+        "has_action": true,
+        "has_version": true,
+        "has_req_key": true,
+        "has_async": true,
+        "has_request_url": true
+      },
+      "elapsed": 0.51,
+      "text_size": 362518
+    }
+  ],
+  "unknown_docs": [
+    {
+      "id": "video_s20_pro_deprecated",
+      "name": "即梦AI-视频生成S2.0 Pro（陆续下线中）",
+      "priority": "P3",
+      "tool": "jimeng_generate_video"
+    },
+    {
+      "id": "t2v_s20_pro_deprecated",
+      "name": "即梦AI-文生视频S2.0Pro（陆续下线中）",
+      "priority": "P3",
+      "tool": "jimeng_generate_video"
+    },
+    {
+      "id": "i2v_s20_pro_deprecated",
+      "name": "即梦AI-图生视频S2.0Pro（陆续下线中）",
+      "priority": "P3",
+      "tool": "jimeng_generate_video"
+    },
+    {
+      "id": "xiaoyunque_marketing_agent",
+      "name": "小云雀营销成片 Agent",
+      "priority": "P2",
+      "tool": "jimeng_video_agent"
+    }
+  ],
+  "smoke_results": [
+    {
+      "id": "legacy_cvprocess_image_v21_l",
+      "name": "Legacy CVProcess 即梦 v21_L 文生图",
+      "priority": "legacy-smoke",
+      "tool": "legacy_generate_image",
+      "endpoint": "https://visual.volcengineapi.com/?Action=CVProcess&Version=2022-08-31",
+      "status": "success",
+      "http_status": 200,
+      "biz_code": 10000,
+      "media_source": "image_urls",
+      "output_path": "/Users/zjj/home/learn26/ttsapp/backend/comic_api_test/jimeng_full_flow/outputs/legacy_cvprocess_image_v21_l.png",
+      "elapsed": 7.54,
+      "response_preview": {
+        "code": 10000,
+        "data_keys": [
+          "algorithm_base_resp",
+          "binary_data_base64",
+          "image_urls",
+          "llm_result",
+          "mood_board_llm_result",
+          "mood_board_llm_tag",
+          "pe_result",
+          "predict_tags_result",
+          "rephraser_result",
+          "request_id",
+          "vlm_result"
+        ]
+      }
+    }
+  ]
+}

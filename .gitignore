@@ -1,0 +1,65 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+backend/venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+build/
+.cache/
+.vite/
+coverage/
+frontend/node_modules/
+frontend/dist/
+frontend-myagent2/node_modules/
+frontend-myagent2/dist/
+ele-admin-plus-ts/node_modules/
+ele-admin-plus-ts/dist/
+
+# Logs and runtime files
+*.log
+logs/
+backend/logs/
+*.pid
+.backend.pid
+.frontend.pid
+.backend.port
+.frontend.port
+
+# Local databases and generated data
+*.db
+*.sqlite
+*.sqlite3
+backend-myagent2/data/*.db
+uploads/
+backend/uploads/
+backend/comic_api_test/**/outputs/
+
+# OS and IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Media/generated large artifacts
+*.mp4
+*.mgg

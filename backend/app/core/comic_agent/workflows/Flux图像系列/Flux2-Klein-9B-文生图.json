@@ -1,0 +1,58 @@
+{
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "75",
+        0
+      ],
+      "filename_prefix": "Flux2-Klein"
+    }
+  },
+  "78": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "77",
+        0
+      ],
+      "filename_prefix": "Flux2-Klein"
+    }
+  },
+  "77": {
+    "class_type": "a67caa28-5f85-4917-8396-36004960dd30",
+    "inputs": {
+      "text": [
+        "76",
+        0
+      ],
+      "value": "",
+      "value_1": 1024,
+      "noise_seed": 1024,
+      "unet_name": 432262096973490,
+      "clip_name": null,
+      "vae_name": "flux-2-klein-9b-fp8.safetensors"
+    }
+  },
+  "75": {
+    "class_type": "7b34ab90-36f9-45ba-a665-71d418f0df18",
+    "inputs": {
+      "text": [
+        "76",
+        0
+      ],
+      "value": "",
+      "value_1": 1024,
+      "noise_seed": 1024,
+      "unet_name": 432262096973500,
+      "clip_name": null,
+      "vae_name": "flux-2-klein-base-9b-fp8.safetensors"
+    }
+  },
+  "76": {
+    "class_type": "PrimitiveStringMultiline",
+    "inputs": {
+      "value": "一辆复古摩托车停在一家怀旧餐厅前，餐厅名为“ComfyUI”，正值日落时分，天空呈现出温暖的橙粉色，霓虹灯招牌闪烁着光芒，整体呈现 80 年代复古照片风格，带有胶片颗粒感和暖色调。"
+    }
+  }
+}
