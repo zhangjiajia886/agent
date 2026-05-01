@@ -18,7 +18,7 @@
     </div>
 
     <!-- ══════════ 设置抽屉 ══════════ -->
-    <SettingsDrawer v-model="drawerVisible" v-model:tab="drawerTab" />
+    <SettingsDrawer v-model="drawerVisible" v-model:tab="drawerTab" :task-uid="activeTask?.taskUid" />
 
     <!-- 消息区域 -->
     <div class="messages-area" ref="messagesRef">
@@ -54,10 +54,13 @@
         :all-image-urls="allImageUrls"
         :result-analysis-text="resultAnalysisText"
         :final-report-text="finalReportText"
+        :budget-usage="budgetUsage"
         :visible-assistant-messages="visibleAssistantMessages"
         :step-logs="stepLogs"
         :compact-log-content="compactLogContent"
         @approve-step="approveTaskStep"
+        @cancel-task="handleCancelTask"
+        @retry-step="handleRetryStep"
       />
 
       <ChatMessageList
@@ -114,7 +117,7 @@
 import { ref, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Delete, Download, Setting } from '@element-plus/icons-vue'
-import { uploadAgentImage } from '@/api/comic-agent'
+import { uploadAgentImage, cancelTask, retryStep } from '@/api/comic-agent'
 import type { AttachedImage } from './types'
 import { useTask, useElapsed, useConfig, useChat } from './composables'
 import SettingsDrawer from './components/SettingsDrawer.vue'
@@ -155,7 +158,7 @@ const {
   completedStepCount,
   visiblePlanSteps, executableSteps,
   showPlanBlock, showExecutionBlock, showResultBlock, showFinalBlock,
-  resultAnalysisText, finalReportText,
+  resultAnalysisText, finalReportText, budgetUsage,
   approveTaskStep, handleToolApproval,
   handleSend: _handleSend,
   sendQuickPrompt: _sendQuickPrompt,
@@ -215,6 +218,24 @@ function removeAttachedImage(index: number) {
   const item = attachedImages.value[index]
   URL.revokeObjectURL(item.previewUrl)
   attachedImages.value.splice(index, 1)
+}
+
+// ──────────── 任务操作 ────────────
+async function handleCancelTask() {
+  if (!activeTask.value?.taskUid) return
+  try {
+    await cancelTask(activeTask.value.taskUid)
+    activeTask.value.status = 'canceled'
+    ElMessage.success('任务已取消')
+  } catch { ElMessage.error('取消失败') }
+}
+
+async function handleRetryStep(step: { id: string }) {
+  if (!activeTask.value?.taskUid) return
+  try {
+    await retryStep(activeTask.value.taskUid, step.id)
+    ElMessage.success('已重新提交步骤')
+  } catch { ElMessage.error('重试失败') }
 }
 
 onUnmounted(() => disconnect())

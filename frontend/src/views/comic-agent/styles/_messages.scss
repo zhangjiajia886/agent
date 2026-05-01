@@ -353,3 +353,12 @@
     display: block;
   }
 }
+
+// ──────────── 审批倒计时 ────────────
+.approval-countdown {
+  font-size: 12px;
+  font-family: 'SF Mono', Consolas, monospace;
+  color: #e6a23c;
+  font-weight: 600;
+  margin-left: auto;
+}

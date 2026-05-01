@@ -95,7 +95,11 @@
         <div class="tool-card-header">
           <el-icon color="#E6A23C"><Warning /></el-icon>
           <span class="tool-name">{{ toolDisplayName(msg.tool) }}</span>
-          <el-tag size="small" type="warning">待你确认</el-tag>
+          <el-tag size="small" :type="riskTagType(msg.tool)">{{ riskLabel(msg.tool) }}</el-tag>
+          <el-tag v-if="!msg.confirmed" size="small" type="warning">待你确认</el-tag>
+          <span v-if="!msg.confirmed && getCountdown(msg.id) > 0" class="approval-countdown">
+            ⏱ {{ getCountdown(msg.id) }}s
+          </span>
         </div>
         <div class="tool-action-desc" v-if="msg.description">{{ msg.description }}</div>
         <div class="tool-params" v-if="msg.toolInput">
@@ -174,21 +178,80 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, onUnmounted } from 'vue'
 import { Loading, CircleCheck, Warning } from '@element-plus/icons-vue'
 import type { AgentMessage } from '@/api/comic-agent'
 import { toolDisplayName, toolHint } from '../composables'
 import { renderMarkdown, formatTime, compactParams } from '../utils'
 
-defineProps<{
+const APPROVAL_TIMEOUT = 300 // 5 minutes
+
+const props = defineProps<{
   timelineMessages: AgentMessage[]
   streamingText: string
   allImageUrls: string[]
   toolElapsed: (timestamp?: string) => string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'tool-approval', msg: AgentMessage, action: 'approve' | 'reject'): void
 }>()
+
+// ── 审批倒计时 ──
+const countdowns = ref<Map<number, number>>(new Map())
+const timers = new Map<number, ReturnType<typeof setInterval>>()
+
+function getCountdown(msgId: number): number {
+  return countdowns.value.get(msgId) ?? 0
+}
+
+function startCountdown(msg: AgentMessage) {
+  if (timers.has(msg.id)) return
+  countdowns.value.set(msg.id, APPROVAL_TIMEOUT)
+  const timer = setInterval(() => {
+    const cur = (countdowns.value.get(msg.id) ?? 0) - 1
+    if (cur <= 0) {
+      clearInterval(timer)
+      timers.delete(msg.id)
+      countdowns.value.delete(msg.id)
+      if (!msg.confirmed) emit('tool-approval', msg, 'reject')
+    } else {
+      countdowns.value.set(msg.id, cur)
+    }
+  }, 1000)
+  timers.set(msg.id, timer)
+}
+
+watch(() => props.timelineMessages, (msgs) => {
+  for (const m of msgs) {
+    if (m.type === 'tool_confirm' && !m.confirmed && !timers.has(m.id)) {
+      startCountdown(m)
+    }
+  }
+}, { immediate: true, deep: true })
+
+onUnmounted(() => { timers.forEach(t => clearInterval(t)); timers.clear() })
+
+// ── 风险等级 ──
+const HIGH_RISK_TOOLS = ['run_code', 'execute_shell', 'delete_file']
+const MEDIUM_RISK_TOOLS = ['image_to_video', 'text_to_speech', 'merge_media']
+
+function riskLevel(tool?: string): 'high' | 'medium' | 'low' {
+  if (!tool) return 'low'
+  if (HIGH_RISK_TOOLS.includes(tool)) return 'high'
+  if (MEDIUM_RISK_TOOLS.includes(tool)) return 'medium'
+  return 'low'
+}
+
+function riskTagType(tool?: string) {
+  const r = riskLevel(tool)
+  return r === 'high' ? 'danger' : r === 'medium' ? 'warning' : 'success'
+}
+
+function riskLabel(tool?: string) {
+  const r = riskLevel(tool)
+  return r === 'high' ? '高风险' : r === 'medium' ? '中风险' : '低风险'
+}
 </script>
 
 <style lang="scss">

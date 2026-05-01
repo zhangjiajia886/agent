@@ -183,13 +183,26 @@
         </div>
       </el-tab-pane>
 
+      <!-- ─── Tab 5: 工具健康 ─── -->
+      <el-tab-pane label="💊 工具健康" name="health">
+        <ToolHealthPanel />
+      </el-tab-pane>
+
+      <!-- ─── Tab 6: Trace 时间线 ─── -->
+      <el-tab-pane label="📈 Trace" name="trace">
+        <TraceTimeline :task-uid="taskUid" />
+      </el-tab-pane>
+
     </el-tabs>
   </el-drawer>
 </template>
 
 <script setup lang="ts">
 import { useConfig } from '../composables'
+import ToolHealthPanel from './ToolHealthPanel.vue'
+import TraceTimeline from './TraceTimeline.vue'
 
+const props = defineProps<{ taskUid?: string | null }>()
 const visible = defineModel<boolean>({ required: true })
 const activeTab = defineModel<string>('tab', { default: 'tools' })
 

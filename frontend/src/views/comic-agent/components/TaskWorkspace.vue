@@ -8,9 +8,16 @@
             <span class="section-kicker">Requirement Understanding</span>
             <h2>需求理解</h2>
           </div>
-          <el-tag :type="taskStatusType(activeTask.status)" effect="dark">
-            {{ taskStatusLabel(activeTask.status) }}
-          </el-tag>
+          <div style="display:flex;align-items:center;gap:8px">
+            <el-tag :type="taskStatusType(activeTask.status)" effect="dark">
+              {{ taskStatusLabel(activeTask.status) }}
+            </el-tag>
+            <el-button
+              v-if="activeTask.status === 'running'"
+              type="danger" size="small" plain
+              @click="$emit('cancel-task')"
+            >取消任务</el-button>
+          </div>
         </div>
         <div class="requirement-card">
           <div class="requirement-label">用户需求</div>
@@ -43,6 +50,11 @@
           </div>
           <span class="progress-text">{{ completedStepCount }}/{{ activeTask.steps.length }} 已完成</span>
         </div>
+        <el-progress
+          :percentage="activeTask.steps.length ? Math.round(completedStepCount / activeTask.steps.length * 100) : 0"
+          :stroke-width="6"
+          style="margin-bottom:12px"
+        />
         <div class="plan-list">
           <div v-for="(step, index) in visiblePlanSteps" :key="step.id" :class="['plan-row', `plan-row--${step.status}`]">
             <span class="plan-index">{{ index + 1 }}</span>
@@ -86,6 +98,9 @@
             <div v-if="step.status === 'awaiting_approval'" class="inline-approval">
               <el-button type="primary" size="small" @click="$emit('approve-step', step, 'approve')">确认执行</el-button>
               <el-button type="danger" size="small" plain @click="$emit('approve-step', step, 'reject')">取消操作</el-button>
+            </div>
+            <div v-if="step.status === 'failed'" class="inline-approval">
+              <el-button type="warning" size="small" @click="$emit('retry-step', step)">重试此步骤</el-button>
             </div>
             <el-collapse v-if="stepLogs(step).length" class="compact-tool-collapse">
               <el-collapse-item>
@@ -151,6 +166,7 @@
           </div>
         </div>
         <div class="final-report" v-html="renderMarkdown(finalReportText)"></div>
+        <BudgetSummary v-if="budgetUsage" :budget="budgetUsage" style="margin-top:12px" />
         <div v-if="visibleAssistantMessages.length" class="assistant-final-messages">
           <div v-for="msg in visibleAssistantMessages" :key="msg.id" class="summary-message">
             <div v-if="msg.content" v-html="renderMarkdown(msg.content || '')"></div>
@@ -166,6 +182,7 @@ import type { AgentTaskViewModel, TaskStep, TaskLog } from '../types'
 import type { AgentMessage } from '@/api/comic-agent'
 import { taskStatusLabel, taskStatusType, stepStatusLabel, stepStatusType } from '../composables'
 import { renderMarkdown, formatTime } from '../utils'
+import BudgetSummary from './BudgetSummary.vue'
 
 defineProps<{
   activeTask: AgentTaskViewModel | null
@@ -179,6 +196,7 @@ defineProps<{
   allImageUrls: string[]
   resultAnalysisText: string
   finalReportText: string
+  budgetUsage?: Record<string, any> | null
   visibleAssistantMessages: AgentMessage[]
   stepLogs: (step: TaskStep) => TaskLog[]
   compactLogContent: (content: string) => string
@@ -186,6 +204,8 @@ defineProps<{
 
 defineEmits<{
   (e: 'approve-step', step: TaskStep, action: 'approve' | 'reject'): void
+  (e: 'retry-step', step: TaskStep): void
+  (e: 'cancel-task'): void
 }>()
 </script>
 

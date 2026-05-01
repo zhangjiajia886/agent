@@ -42,6 +42,7 @@ export function useChat(opts: UseChatOptions) {
   const inputText = ref('')
   const sending = ref(false)
   const streamingText = ref('')
+  const budgetUsage = ref<Record<string, any> | null>(null)
   let msgIdCounter = 0
 
   // ──────────── WebSocket 实例 ────────────
@@ -250,6 +251,9 @@ export function useChat(opts: UseChatOptions) {
         const lastThinking = _lastThinkingMsg()
         if (lastThinking) lastThinking.isFinished = true
         sending.value = false
+        if (event.metadata?.budget_usage) {
+          budgetUsage.value = event.metadata.budget_usage as Record<string, any>
+        }
         if (activeTask.value && event.final_report) {
           activeTask.value.finalReport = event.final_report
           activeTask.value.status = mapServerTaskStatus(event.status || event.final_report.status as string | undefined)
@@ -475,6 +479,16 @@ export function useChat(opts: UseChatOptions) {
             })
             scrollToBottom()
           },
+          0,
+          {
+            autoReconnect: true,
+            onReconnect: () => {
+              const taskUid = agentWS.lastTaskUid
+              if (taskUid) {
+                agentWS.replayEvents(taskUid, handleAgentEvent).catch(() => {})
+              }
+            },
+          },
         )
       }
 
@@ -560,6 +574,7 @@ export function useChat(opts: UseChatOptions) {
     showFinalBlock,
     resultAnalysisText,
     finalReportText,
+    budgetUsage,
     // 方法
     scrollToBottom,
     approveTaskStep,
