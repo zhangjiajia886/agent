@@ -106,7 +106,7 @@ Auditor
 - [x] TaskPlanner 写入 `depends_on` 到 RuntimeStep。
 - [x] 新建 `step_executor.py`（StepContext + StepExecutor）。
 - [x] 主循环已接入 Scheduler / Replanner / EventTracer。
-- [ ] 改造主循环为完全 Scheduler 驱动。
+- [x] 改造主循环为 Scheduler 驱动（每轮 evaluate + step prompt 注入 + all_done 提前退出）。
 - [x] 保留旧 ReAct fallback。
 
 ## 10. 验收标准
@@ -114,5 +114,5 @@ Auditor
 - [x] `get_ready_steps` 只返回依赖全部 succeeded 的 pending step。
 - [x] 上游 failed 时下游自动 blocked。
 - [x] 每个 step 状态可追踪（status + summary）。
-- [ ] 图片未生成前不会执行图生视频（待主循环改造）。
-- [ ] LLM 输出跨步骤计划不会改变 Scheduler 决策（待主循环改造）。
+- [x] 图片未生成前不会执行图生视频（Scheduler deps_satisfied 保证）。
+- [x] LLM 输出跨步骤计划不会改变 Scheduler 决策（step prompt 约束 + Scheduler 独立计算）。

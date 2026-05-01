@@ -23,6 +23,7 @@ from .task_planner import TaskPlanner
 from .task_scheduler import TaskScheduler
 from .replanner import Replanner
 from .event_tracer import EventTracer, TraceType
+from .step_executor import StepExecutor, StepContext
 from .task_runtime import (
     apply_tool_result,
     audit_task,
@@ -481,8 +482,39 @@ async def agent_stream(
         "content": f"模型：{model_name}\n已加载工具：{len(tools)} 个\n工具列表：{tool_names_str}\n历史消息：{len(history)} 条",
     }
 
+    step_executor = StepExecutor()
+
     for iteration in range(MAX_ITERATIONS + 1):
         is_summary_round = iteration == MAX_ITERATIONS
+
+        # ── Scheduler 驱动：计算 ready steps ──
+        if not is_summary_round and iteration > 0:
+            sched_eval = scheduler.evaluate()
+            if sched_eval.all_done:
+                logger.info("[Scheduler] all steps done, exiting loop")
+                break
+            if sched_eval.ready_steps:
+                current_ready = sched_eval.ready_steps[0]
+                upstream = scheduler.collect_upstream_outputs(current_ready)
+                ctx = StepContext(
+                    step=current_ready,
+                    user_goal=user_message,
+                    upstream_outputs={s.step_uid: s.outputs for s in runtime_task.steps if s.status == "succeeded" and s.outputs},
+                    available_tools=[t["function"]["name"] for t in tools] if tools else [],
+                    model_name=model_name,
+                )
+                step_prompt = step_executor.build_step_prompt(ctx)
+                step_mem = step_executor.build_step_memory(ctx)
+                # 注入步骤约束到消息
+                _step_hint = {"role": "system", "content": f"[Scheduler 调度] 当前执行步骤：{current_ready.title}\n\n{step_prompt}"}
+                if messages and messages[-1].get("role") == "system" and messages[-1].get("content", "").startswith("[Scheduler"):
+                    messages[-1] = _step_hint
+                else:
+                    messages.append(_step_hint)
+                if step_mem:
+                    messages.append({"role": "system", "content": step_mem})
+                yield {"type": "thinking", "content": f"📋 Scheduler: 执行步骤 [{current_ready.title}]"}
+                logger.info(f"[Scheduler] driving step: {current_ready.step_uid} {current_ready.title}")
 
         # ── 工作记忆注入 ──
         if artifacts and iteration > 0:
@@ -837,15 +869,25 @@ async def agent_stream(
                 artifacts.append(f"文件: {result['path']}")
 
         if not is_summary_round:
+            # ── Scheduler 同步：标记下游阻塞 ──
+            post_eval = scheduler.evaluate()
+            if post_eval.blocked_steps:
+                for bs in post_eval.blocked_steps:
+                    tracer.trace_step_status(step_uid=bs.step_uid, status="blocked")
+                    yield await persist_event(step_update_event(runtime_task, bs))
+            if post_eval.all_done:
+                logger.info("[Scheduler] all steps done after tool execution")
+                break
+            next_ready = post_eval.ready_steps
             yield {
                 "type": "thinking",
-                "content": f"\U0001f504 工具执行完毕，继续下一步... (第 {iteration + 2}/{MAX_ITERATIONS} 轮)",
+                "content": f"🔄 工具执行完毕，Scheduler: {len(next_ready)} 个步骤就绪 (第 {iteration + 2}/{MAX_ITERATIONS} 轮)",
             }
 
-    # ── Scheduler 综合评估 ──
-    sched_decision = scheduler.evaluate()
-    if sched_decision.blocked_steps:
-        logger.info(f"[Scheduler] {len(sched_decision.blocked_steps)} steps blocked by upstream failure")
+    # ── 最终 Scheduler 评估 ──
+    final_sched = scheduler.evaluate()
+    if final_sched.blocked_steps:
+        logger.info(f"[Scheduler] {len(final_sched.blocked_steps)} steps blocked by upstream failure")
 
     usage = budget_ctrl.usage
     metadata = {
