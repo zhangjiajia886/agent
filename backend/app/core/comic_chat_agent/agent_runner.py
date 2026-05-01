@@ -14,6 +14,7 @@ from app.models.agent_config import ModelConfig, ToolRegistry
 from app.models.agent_prompt import AgentPrompt
 from .openai_client import OpenAICompatClient, LLMResponse, LLMStreamChunk
 from .agent_state import AgentStateStore
+from .budget import BudgetController, BudgetAction
 from .tool_executor import execute_tool
 from .tool_result import normalize_tool_result
 from .task_store import AgentTaskStore
@@ -449,9 +450,7 @@ async def agent_stream(
         )
         await task_store.create_steps(runtime_task)
 
-    tool_call_counts: dict[str, int] = {}
-    total_input_tokens = 0
-    total_output_tokens = 0
+    budget_ctrl = BudgetController()
     force_tool_choice: Optional[str] = None  # "required" 强制调工具
     no_tool_streak = 0  # 连续无工具调用轮数
     no_tool_reviewed = False  # 空工具后是否已经要求模型审计任务完成度
@@ -536,8 +535,7 @@ async def agent_stream(
                     yield {"type": "delta", "content": chunk.text}
                 elif chunk.is_done:
                     final_tool_calls = chunk.tool_calls
-                    total_input_tokens += chunk.input_tokens
-                    total_output_tokens += chunk.output_tokens
+                    budget_ctrl.record_tokens(chunk.input_tokens, chunk.output_tokens)
         except Exception as e:
             logger.error(f"[AgentRunner] LLM call failed iter={iteration}: {e}")
             runtime_task.status = "failed"
@@ -584,7 +582,7 @@ async def agent_stream(
                 re.search(r"(?:第[1-9一二三四五六]步|步骤\s*[1-9]|^\s*\d+[\.\)、\)])", text, re.M)
                 or re.search(r"(分\s*\d+\s*步|开始执行|先.*然后|我先执行|先生成|再做|基于.*做)", text)
             ))
-            tools_executed = sum(tool_call_counts.values()) > 0
+            tools_executed = budget_ctrl.usage.tool_calls > 0
             incomplete = bool(text and re.search(
                 r"(剩余\s*TODO|尚未完成|未完成|还需要|需要继续|下一步|先执行第?\s*[1-9一二三四五六]?\s*步)",
                 text,
@@ -646,10 +644,10 @@ async def agent_stream(
         }
 
         for tc in final_tool_calls:
-            tool_call_counts[tc.name] = tool_call_counts.get(tc.name, 0) + 1
-            limit = MAX_TOOL_CALLS_PER_TOOL.get(tc.name, 99)
-            if tool_call_counts[tc.name] > limit:
-                result = {"error": f"工具 {tc.name} 本次对话已调用 {limit} 次，已达上限"}
+            # ── P11 工具预算检查 ──
+            tool_decision = budget_ctrl.pre_tool_check(tc.name)
+            if tool_decision.action == BudgetAction.BLOCK:
+                result = {"error": tool_decision.message}
                 yield {"type": "tool_start", "tool": tc.name, "input": tc.arguments, "description": _tool_action_description(tc.name, tc.arguments)}
                 yield {
                     "type": "tool_done", "tool": tc.name,
@@ -660,6 +658,9 @@ async def agent_stream(
                     "content": _compact_tool_result(tc.name, result),
                 })
                 continue
+            if tool_decision.action == BudgetAction.WARN:
+                logger.warning(f"[Budget] {tool_decision.message}")
+            budget_ctrl.record_tool_call(tc.name)
 
             desc = _tool_action_description(tc.name, tc.arguments)
             _needs_approval = (
@@ -795,13 +796,15 @@ async def agent_stream(
                 "content": f"\U0001f504 工具执行完毕，继续下一步... (第 {iteration + 2}/{MAX_ITERATIONS} 轮)",
             }
 
+    usage = budget_ctrl.usage
     metadata = {
         "model": model_name,
         "iterations": min(iteration + 1, MAX_ITERATIONS + 1),
-        "total_tool_calls": sum(tool_call_counts.values()),
-        "tools_used": list(tool_call_counts.keys()),
-        "input_tokens": total_input_tokens,
-        "output_tokens": total_output_tokens,
+        "total_tool_calls": usage.tool_calls,
+        "tools_used": list(usage.calls_per_tool.keys()),
+        "input_tokens": usage.input_tokens,
+        "output_tokens": usage.output_tokens,
+        "budget_usage": usage.to_dict(),
     }
     audit = audit_task(runtime_task, accumulated_text if "accumulated_text" in locals() else "")
     final_event = final_report_event(runtime_task, audit, metadata)
