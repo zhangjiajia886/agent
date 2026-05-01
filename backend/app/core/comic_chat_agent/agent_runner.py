@@ -4,6 +4,7 @@ Agent Runner —— LLM ReAct 循环驱动的漫剧 Agent。
 """
 import json
 import asyncio
+import time as _time
 from typing import AsyncIterator, Optional
 
 from sqlalchemy import select
@@ -19,6 +20,9 @@ from .tool_executor import execute_tool
 from .tool_result import normalize_tool_result
 from .task_store import AgentTaskStore
 from .task_planner import TaskPlanner
+from .task_scheduler import TaskScheduler
+from .replanner import Replanner
+from .event_tracer import EventTracer, TraceType
 from .task_runtime import (
     apply_tool_result,
     audit_task,
@@ -453,6 +457,9 @@ async def agent_stream(
         await task_store.create_steps(runtime_task)
 
     budget_ctrl = BudgetController()
+    scheduler = TaskScheduler(runtime_task)
+    replanner = Replanner()
+    tracer = EventTracer(task_uid=runtime_task.task_uid)
     force_tool_choice: Optional[str] = None  # "required" 强制调工具
     no_tool_streak = 0  # 连续无工具调用轮数
     no_tool_reviewed = False  # 空工具后是否已经要求模型审计任务完成度
@@ -538,6 +545,12 @@ async def agent_stream(
                 elif chunk.is_done:
                     final_tool_calls = chunk.tool_calls
                     budget_ctrl.record_tokens(chunk.input_tokens, chunk.output_tokens)
+                    tracer.trace_llm_call(
+                        model=model_name,
+                        input_tokens=chunk.input_tokens,
+                        output_tokens=chunk.output_tokens,
+                        iteration=iteration,
+                    )
         except Exception as e:
             logger.error(f"[AgentRunner] LLM call failed iter={iteration}: {e}")
             runtime_task.status = "failed"
@@ -746,11 +759,22 @@ async def agent_stream(
             yield await persist_event({"type": "tool_start", "task_uid": runtime_task.task_uid, "step_uid": current_step.step_uid, "tool": tc.name, "input": tc.arguments, "description": desc})
 
             logger.info(f"[AgentRunner] exec tool={tc.name} args={tc.arguments}")
+            _tool_t0 = _time.time()
             try:
                 result = await execute_tool(tc.name, tc.arguments)
             except Exception as e:
                 logger.error(f"[AgentRunner] tool exec failed: {tc.name}: {e}")
                 result = {"error": str(e), "status": "failed"}
+            _tool_dur = (_time.time() - _tool_t0) * 1000
+            tracer.trace_tool_call(
+                step_uid=current_step.step_uid,
+                tool_name=tc.name,
+                tool_input=tc.arguments,
+                tool_output=result if not result.get("error") else None,
+                status="failed" if result.get("error") else "succeeded",
+                duration_ms=_tool_dur,
+                error=str(result.get("error", "")) if result.get("error") else "",
+            )
 
             standard_result = normalize_tool_result(tc.name, result, tc.id)
             tool_done_event = {
@@ -776,6 +800,26 @@ async def agent_stream(
                     await task_store.update_task(runtime_task)
                 yield await persist_event(runtime_event)
 
+            # ── Replanner: 工具失败后决策 ──
+            if current_step.status == "failed" and result.get("error"):
+                replan_decision = replanner.decide(
+                    runtime_task, current_step,
+                    error={"message": str(result.get("error", ""))},
+                )
+                tracer.trace_replan(decision={
+                    "action": replan_decision.action,
+                    "step_uid": replan_decision.step_uid,
+                    "reason": replan_decision.reason,
+                    "next_tool": replan_decision.next_tool,
+                })
+                if replan_decision.action == "retry" and replan_decision.next_tool:
+                    current_step.status = "pending"
+                    logger.info(f"[Replanner] retry {tc.name}")
+                elif replan_decision.action == "fallback_tool" and replan_decision.next_tool:
+                    current_step.status = "pending"
+                    current_step.tool_name = replan_decision.next_tool
+                    logger.info(f"[Replanner] fallback → {replan_decision.next_tool}")
+
             messages.append({
                 "role": "tool",
                 "tool_call_id": tc.id,
@@ -798,6 +842,11 @@ async def agent_stream(
                 "content": f"\U0001f504 工具执行完毕，继续下一步... (第 {iteration + 2}/{MAX_ITERATIONS} 轮)",
             }
 
+    # ── Scheduler 综合评估 ──
+    sched_decision = scheduler.evaluate()
+    if sched_decision.blocked_steps:
+        logger.info(f"[Scheduler] {len(sched_decision.blocked_steps)} steps blocked by upstream failure")
+
     usage = budget_ctrl.usage
     metadata = {
         "model": model_name,
@@ -809,6 +858,8 @@ async def agent_stream(
         "budget_usage": usage.to_dict(),
     }
     audit = audit_task(runtime_task, accumulated_text if "accumulated_text" in locals() else "")
+    tracer.trace_audit(result=audit)
+    metadata["trace_summary"] = tracer.summary()
     final_event = final_report_event(runtime_task, audit, metadata)
     if task_store:
         await task_store.update_task(runtime_task, final_report=final_event.get("final_report"))
