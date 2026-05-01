@@ -1,7 +1,7 @@
 # P2 TaskPlanner 设计
 
 > 所属阶段：P2  
-> 状态：待实施  
+> 状态：最小实现已落地  
 > 目标：从关键词 RuntimeStep 升级为结构化 TaskGraph Planner。
 
 ---
@@ -14,11 +14,11 @@ P2 要引入正式 `TaskPlanner`。
 
 ## 2. 目标
 
-- [ ] 生成结构化 TaskGraph。
-- [ ] 支持图片、视频、TTS、合成、多格漫剧模板。
-- [ ] 支持 `depends_on`。
-- [ ] 支持 `required` 标记。
-- [ ] 支持工具可用性校验。
+- [x] 生成结构化 TaskGraph（`PlannedStep` + `depends_on`）。
+- [x] 支持图片、视频、TTS、合成、多格漫剧模板。
+- [x] 支持 `depends_on`。
+- [x] 支持 `required` 标记。
+- [x] 支持工具可用性校验（preferred + fallback）。
 
 ## 3. 非目标
 
@@ -250,21 +250,21 @@ Scheduler 使用这些字段判断：
 
 ## 10. TODO
 
-- [ ] 新建 `planner.py`。
-- [ ] 定义 PlannedTask / PlannedStep。
-- [ ] 实现规则模板。
-- [ ] 接入 style/frames/tts/autoVideo/image_paths。
-- [ ] 接入工具可用性校验。
-- [ ] 写入 `AgentStep.depends_on`。
-- [ ] 为核心工具补充能力元数据。
-- [ ] Planner 读取 `ToolRegistry.executor_config`。
+- [x] 新建 `task_planner.py`。
+- [x] 定义 `PlannedStep`。
+- [x] 实现规则模板（单图 / 图生视频 / TTS+合成 / 多格漫剧）。
+- [x] 接入工具可用性校验（_resolve_tool + fallback）。
+- [x] 读取 P8 `ToolCapability` 元数据。
+- [x] 替代 agent_runner 中的 `create_runtime_task`。
+- [ ] 接入 style/image_paths 参数。
+- [ ] 写入 `AgentStep.depends_on` 到 DB。
 - [ ] 缺少 required input 时生成 blocked/ask_user。
 
 ## 11. 验收标准
 
-- [ ] 复杂创作任务能生成带依赖的 TaskGraph。
-- [ ] 多格任务能生成多 frame 步骤。
-- [ ] 缺工具时明确 blocked。
-- [ ] 前端计划来自后端。
-- [ ] Planner 生成的每个工具 step 都有输入/输出产物类型。
-- [ ] 禁用工具不会被 Planner 放入可执行步骤。
+- [x] 复杂创作任务能生成带依赖的 TaskGraph。
+- [x] 多格任务能生成多 frame 步骤。
+- [x] 缺工具时尝试 fallback。
+- [x] Planner 生成的每个工具 step 都有 output_artifact_types / fallback_tools。
+- [ ] 前端计划来自后端（待前端对接）。
+- [ ] 禁用工具不会被 Planner 放入可执行步骤（待 enabled_tools 从 DB 加载）。

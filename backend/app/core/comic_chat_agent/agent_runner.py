@@ -18,6 +18,7 @@ from .budget import BudgetController, BudgetAction
 from .tool_executor import execute_tool
 from .tool_result import normalize_tool_result
 from .task_store import AgentTaskStore
+from .task_planner import TaskPlanner
 from .task_runtime import (
     apply_tool_result,
     audit_task,
@@ -426,7 +427,8 @@ async def agent_stream(
     history = conversation_history or []
     messages = build_messages(system_prompt, history, user_message)
     model_name = model_config.model_id
-    runtime_task = create_runtime_task(user_message)
+    planner = TaskPlanner()
+    runtime_task = planner.plan_to_runtime(user_message)
     task_store = AgentTaskStore() if conversation_id else None
     state_store = AgentStateStore()
     lock_owner = f"conversation:{conversation_id or 0}:user:{user_id or 0}"
