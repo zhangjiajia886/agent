@@ -152,7 +152,7 @@ const messagesRef = ref<HTMLElement>()
 const {
   messages, inputText, sending, streamingText,
   allImageUrls, timelineMessages, visibleAssistantMessages,
-  completedStepCount, hasAgentProgress,
+  completedStepCount,
   visiblePlanSteps, executableSteps,
   showPlanBlock, showExecutionBlock, showResultBlock, showFinalBlock,
   resultAnalysisText, finalReportText,
